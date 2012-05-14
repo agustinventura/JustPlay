@@ -38,15 +38,15 @@ public class MediaService extends Service {
 	@Override
 	public void onStart(Intent intent, int startId) {
 		super.onStart(intent, startId);
-		Log.d("CrankPlayer", "MediaService.onStart()");
-		this.mediaThread = new Thread(new MediaThread());
-		this.mediaThread.start();
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		// TODO Auto-generated method stub
-		return super.onStartCommand(intent, flags, startId);
+		Log.d("CrankPlayer", "MediaService.onStart()");
+		super.onStartCommand(intent, flags, startId);
+		this.mediaThread = new Thread(new MediaThread());
+		this.mediaThread.start();
+		return START_STICKY;
 	}
 
 	@Override
