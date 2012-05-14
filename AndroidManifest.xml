@@ -18,7 +18,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".MediaService" android:exported="false"/>
+        <activity android:name=".CrankExplorer" android:label="@string/explorer_name"/>
+        
+        <service android:name="com.crankcode.services.MediaService" android:exported="false"/>
     </application>
 
 </manifest>

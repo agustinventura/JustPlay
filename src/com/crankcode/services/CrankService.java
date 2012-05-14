@@ -1,60 +1,59 @@
 package com.crankcode.services;
 
+import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
-import com.crankcode.threads.MediaThread;
+import com.crankcode.utils.CrankLog;
 
-public class MediaService extends CrankService {
+public class CrankService extends Service {
 
-	private Thread mediaThread;
+	@Override
+	public IBinder onBind(Intent arg0) {
+		CrankLog.v(this, "onBind()");
+		return null;
+	}
 
 	@Override
 	public void onCreate() {
+		CrankLog.v(this, "onCreate()");
 		super.onCreate();
-		this.mediaThread = new Thread(new MediaThread());
-		this.mediaThread.start();
 	}
 
 	@Override
 	public void onDestroy() {
-		this.mediaThread.interrupt();
+		CrankLog.v(this, "onDestroy()");
 		super.onDestroy();
 	}
 
 	@Override
 	public void onLowMemory() {
-		// TODO Auto-generated method stub
+		CrankLog.w(this, "onLowMemory()");
 		super.onLowMemory();
 	}
 
 	@Override
 	public void onRebind(Intent intent) {
-		// TODO Auto-generated method stub
+		CrankLog.v(this, "onRebind()");
 		super.onRebind(intent);
 	}
 
 	@Override
 	public void onStart(Intent intent, int startId) {
+		CrankLog.v(this, "onStart()");
 		super.onStart(intent, startId);
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		super.onStartCommand(intent, flags, startId);
-		return START_STICKY;
+		CrankLog.v(this, "onStartCommand()");
+		return super.onStartCommand(intent, flags, startId);
 	}
 
 	@Override
 	public boolean onUnbind(Intent intent) {
-		// TODO Auto-generated method stub
+		CrankLog.v(this, "onUnbind()");
 		return super.onUnbind(intent);
-	}
-
-	@Override
-	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
