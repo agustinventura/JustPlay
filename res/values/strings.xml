@@ -3,10 +3,12 @@
 
     <string name="app_name">CrankPlayer</string>
 	<string name="explorer_name">CrankExplorer</string>
+	<string name="yes">Yes</string>
 	
 	<string name="crankplayer_welcome">Welcome to CrankPlayer, the lightweight Android media player</string>
 	<string name="open_explorer">Open File Explorer</string>
 	
 	<string name="crankexplorer_welcome">Welcome to CrankExplorer, please choose a file.</string>
 	<string name="empty_directory">Current directory is empty</string>
+	<string name="add_file">Do you want to add the selected song to the playlist?</string>
 </resources>

@@ -5,13 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ListActivity;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.crankcode.utils.MediaFileFilter;
 
 public class CrankExplorer extends ListActivity {
 
@@ -37,7 +41,7 @@ public class CrankExplorer extends ListActivity {
 		item = new ArrayList<String>();
 		path = new ArrayList<String>();
 		File f = new File(dirPath);
-		File[] files = f.listFiles();
+		File[] files = f.listFiles(new MediaFileFilter());
 		if (!dirPath.equals(root)) {
 			item.add(root);
 			path.add(root);
@@ -45,8 +49,7 @@ public class CrankExplorer extends ListActivity {
 			path.add(f.getParent());
 		}
 
-		for (int i = 0; i < files.length; i++) {
-			File file = files[i];
+		for (File file : files) {
 			path.add(file.getPath());
 			if (file.isDirectory()) {
 				item.add(file.getName() + "/");
@@ -64,32 +67,27 @@ public class CrankExplorer extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		File file = new File(path.get(position));
 		if (file.isDirectory()) {
-			if (file.canRead()) {
-				getDir(path.get(position));
-			} else {
-				new AlertDialog.Builder(this)
-						.setTitle(
-								"[" + file.getName()
-										+ "] folder can't be read!")
-						.setPositiveButton("OK",
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int which) {
-										// TODO Auto-generated method stub
-									}
-								}).show();
-
-			}
+			onDirectoryClick(position, file);
 		} else {
-			new AlertDialog.Builder(this)
-					.setTitle("[" + file.getName() + "]")
-					.setPositiveButton("OK",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int which) {
-									// TODO Auto-generated method stub
-								}
-							}).show();
+			onFileClick(file);
 		}
+	}
+
+	private void onFileClick(File file) {
+		Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(this.getText(R.string.add_file));
+		builder.setCancelable(true);
+		builder.setPositiveButton(R.string.yes, new OnClickListener() {
+			public void onClick(DialogInterface arg0, int arg1) {
+				// TODO: send intent with mp3 path to CrankPlayer
+			}
+
+		});
+		AlertDialog addFileDialog = builder.create();
+		addFileDialog.show();
+	}
+
+	private void onDirectoryClick(int position, File file) {
+		getDir(path.get(position));
 	}
 }
