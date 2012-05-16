@@ -6,9 +6,9 @@ import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
-import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -17,13 +17,15 @@ import android.widget.TextView;
 
 import com.crankcode.utils.MediaFileFilter;
 
-public class CrankExplorer extends ListActivity {
+public class CrankExplorer extends CrankListActivity {
 
 	private List<String> item = null;
 
 	private List<String> path = null;
 
 	private final String root = "/";
+
+	private File selected = null;
 
 	private TextView myPath;
 
@@ -74,14 +76,19 @@ public class CrankExplorer extends ListActivity {
 	}
 
 	private void onFileClick(File file) {
+		this.selected = file;
 		Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(this.getText(R.string.add_file));
 		builder.setCancelable(true);
 		builder.setPositiveButton(R.string.yes, new OnClickListener() {
-			public void onClick(DialogInterface arg0, int arg1) {
-				// TODO: send intent with mp3 path to CrankPlayer
+			public void onClick(DialogInterface dialog, int button) {
+				finish();
 			}
-
+		});
+		builder.setNegativeButton(R.string.no, new OnClickListener() {
+			public void onClick(DialogInterface dialog, int button) {
+				dialog.cancel();
+			}
 		});
 		AlertDialog addFileDialog = builder.create();
 		addFileDialog.show();
@@ -89,5 +96,15 @@ public class CrankExplorer extends ListActivity {
 
 	private void onDirectoryClick(int position, File file) {
 		getDir(path.get(position));
+	}
+
+	@Override
+	public void finish() {
+		Intent data = new Intent();
+		if (this.selected != null) {
+			data.putExtra("selectedFile", this.selected);
+		}
+		setResult(RESULT_OK, data);
+		super.finish();
 	}
 }

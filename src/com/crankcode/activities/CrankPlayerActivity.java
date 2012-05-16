@@ -1,13 +1,19 @@
 package com.crankcode.activities;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 
 import com.crankcode.services.MediaService;
 
-public class CrankPlayerActivity extends CrankActivity {
+public class CrankPlayerActivity extends CrankListActivity {
 	private final static int REQUEST_CODE = 101;
+	private final List<File> playlist = new ArrayList<File>();
 
 	/** Called when the activity is first created. */
 	@Override
@@ -16,6 +22,7 @@ public class CrankPlayerActivity extends CrankActivity {
 		setContentView(R.layout.crankplayer);
 		Intent intent = new Intent(getBaseContext(), MediaService.class);
 		startService(intent);
+		this.renderPlaylist();
 	}
 
 	@Override
@@ -58,5 +65,19 @@ public class CrankPlayerActivity extends CrankActivity {
 	public void openCrankExplorer(View v) {
 		Intent openCrankExplorer = new Intent(this, CrankExplorer.class);
 		startActivityForResult(openCrankExplorer, REQUEST_CODE);
+	}
+
+	private void renderPlaylist() {
+		ArrayAdapter<File> fileList = new ArrayAdapter<File>(this,
+				R.layout.file_row, playlist);
+		setListAdapter(fileList);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (data.hasExtra("selectedFile")) {
+			this.playlist.add((File) data.getExtras().get("selectedFile"));
+			this.renderPlaylist();
+		}
 	}
 }
