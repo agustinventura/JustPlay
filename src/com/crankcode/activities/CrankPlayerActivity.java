@@ -62,6 +62,20 @@ public class CrankPlayerActivity extends CrankListActivity {
 		startActivityForResult(openCrankExplorer, REQUEST_CODE);
 	}
 
+	public void clearPlaylist(View v) {
+		this.playlist.clear();
+		// TODO: here is also needed to clear mediaservice playlist
+		renderPlaylist();
+	}
+
+	public void play(View v) {
+		// TODO: what should we do?
+	}
+
+	public void stop(View v) {
+		// TODO: stop if playing or paused. Nothing if stopped.
+	}
+
 	private void renderPlaylist() {
 		ArrayAdapter<File> fileList = new ArrayAdapter<File>(this,
 				R.layout.file_row, playlist);

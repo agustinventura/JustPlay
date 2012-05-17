@@ -86,6 +86,7 @@ public class CrankExplorer extends CrankListActivity {
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.setHeaderTitle(R.string.directory_contextual_title);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.crankexplorer_context, menu);
 	}
