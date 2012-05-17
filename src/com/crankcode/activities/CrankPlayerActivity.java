@@ -27,25 +27,21 @@ public class CrankPlayerActivity extends CrankListActivity {
 
 	@Override
 	public void onStart() {
-		// TODO Auto-generated method stub
 		super.onStart();
 	}
 
 	@Override
 	public void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 	}
 
 	@Override
 	public void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
 	}
 
 	@Override
 	public void onStop() {
-		// TODO Auto-generated method stub
 		super.onStop();
 	}
 
@@ -58,7 +54,6 @@ public class CrankPlayerActivity extends CrankListActivity {
 
 	@Override
 	public void onLowMemory() {
-		// TODO Auto-generated method stub
 		super.onLowMemory();
 	}
 
@@ -77,6 +72,11 @@ public class CrankPlayerActivity extends CrankListActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (data.hasExtra("selectedFile")) {
 			this.playlist.add((File) data.getExtras().get("selectedFile"));
+			this.renderPlaylist();
+		} else if (data.hasExtra("selectedFiles")) {
+			List<File> fileList = (List<File>) data.getExtras().get(
+					"selectedFiles");
+			this.playlist.addAll(fileList);
 			this.renderPlaylist();
 		}
 	}

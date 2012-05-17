@@ -10,7 +10,12 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -25,25 +30,27 @@ public class CrankExplorer extends CrankListActivity {
 
 	private final String root = "/";
 
+	private final MediaFileFilter mediaFileFilter = new MediaFileFilter();
+
 	private File selected = null;
 
 	private TextView myPath;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.crankexplorer);
 		myPath = (TextView) findViewById(R.id.path);
 		getDir(root);
+		registerForContextMenu(getListView());
 	}
 
 	private void getDir(String dirPath) {
-		myPath.setText("Location: " + dirPath);
+		myPath.setText(getResources().getString(R.string.directory) + dirPath);
 		item = new ArrayList<String>();
 		path = new ArrayList<String>();
 		File f = new File(dirPath);
-		File[] files = f.listFiles(new MediaFileFilter());
+		File[] files = f.listFiles(mediaFileFilter);
 		if (!dirPath.equals(root)) {
 			item.add(root);
 			path.add(root);
@@ -75,13 +82,42 @@ public class CrankExplorer extends CrankListActivity {
 		}
 	}
 
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.crankexplorer_context, menu);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.addDirectoryItem:
+			AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+					.getMenuInfo();
+			this.selected = new File(this.path.get((int) info.id));
+			if (this.selected.isDirectory()) {
+				finish();
+			}
+			return true;
+		default:
+			return super.onContextItemSelected(item);
+		}
+	}
+
 	private void onFileClick(File file) {
 		this.selected = file;
+		showAddSongDialog();
+	}
+
+	private void showAddSongDialog() {
 		Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(this.getText(R.string.add_file));
 		builder.setCancelable(true);
 		builder.setPositiveButton(R.string.yes, new OnClickListener() {
 			public void onClick(DialogInterface dialog, int button) {
+				dialog.cancel();
 				finish();
 			}
 		});
@@ -102,9 +138,28 @@ public class CrankExplorer extends CrankListActivity {
 	public void finish() {
 		Intent data = new Intent();
 		if (this.selected != null) {
-			data.putExtra("selectedFile", this.selected);
+			if (this.selected.isFile()) {
+				data.putExtra("selectedFile", this.selected);
+			} else if (this.selected.isDirectory()) {
+				List<File> filesInDirectory = this.explodeDir(this.selected);
+				data.putExtra("selectedFiles",
+						(ArrayList<File>) filesInDirectory);
+			}
 		}
 		setResult(RESULT_OK, data);
 		super.finish();
+	}
+
+	private List<File> explodeDir(File directory) {
+		List<File> filesInDirectory = new ArrayList<File>();
+		File[] files = directory.listFiles(mediaFileFilter);
+		for (File file : files) {
+			if (file.isFile()) {
+				filesInDirectory.add(file);
+			} else if (file.isDirectory()) {
+				filesInDirectory.addAll(explodeDir(file));
+			}
+		}
+		return filesInDirectory;
 	}
 }

@@ -11,6 +11,8 @@
 	<string name="empty_playlist">Playlist is empty</string>
 	
 	<string name="crankexplorer_welcome">Welcome to CrankExplorer, please choose a file.</string>
+	<string name="directory">Directory: </string>
 	<string name="empty_directory">Current directory is empty</string>
 	<string name="add_file">Do you want to add the selected song to the playlist?</string>
+	<string name="add_directory">Add directory</string>
 </resources>
