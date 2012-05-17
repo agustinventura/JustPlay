@@ -3,11 +3,13 @@ package com.crankcode.services;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.crankcode.services.binders.MediaServiceBinder;
 import com.crankcode.threads.MediaThread;
 
 public class MediaService extends CrankService {
 
 	private Thread mediaThread;
+	private final IBinder mediaServiceBinder = new MediaServiceBinder(this);
 
 	@Override
 	public void onCreate() {
@@ -23,18 +25,6 @@ public class MediaService extends CrankService {
 	}
 
 	@Override
-	public void onLowMemory() {
-		// TODO Auto-generated method stub
-		super.onLowMemory();
-	}
-
-	@Override
-	public void onRebind(Intent intent) {
-		// TODO Auto-generated method stub
-		super.onRebind(intent);
-	}
-
-	@Override
 	public void onStart(Intent intent, int startId) {
 		super.onStart(intent, startId);
 	}
@@ -46,15 +36,14 @@ public class MediaService extends CrankService {
 	}
 
 	@Override
-	public boolean onUnbind(Intent intent) {
-		// TODO Auto-generated method stub
-		return super.onUnbind(intent);
+	public IBinder onBind(Intent bindingIntent) {
+		return this.mediaServiceBinder;
 	}
 
 	@Override
-	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public boolean onUnbind(Intent intent) {
+		// Nothing to do here
+		return super.onUnbind(intent);
 	}
 
 }
