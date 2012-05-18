@@ -1,25 +1,33 @@
 package com.crankcode.services;
 
+import java.io.File;
+import java.util.List;
+
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.PowerManager;
 
 import com.crankcode.services.binders.MediaServiceBinder;
 import com.crankcode.threads.MediaThread;
 
 public class MediaService extends CrankService {
 
-	private Thread mediaThread;
+	private MediaThread mediaThread;
 	private final IBinder mediaServiceBinder = new MediaServiceBinder(this);
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		this.mediaThread = new Thread(new MediaThread());
+		this.mediaThread = new MediaThread();
 		this.mediaThread.start();
+		// We need to set the CPU always awake
+		this.mediaThread.getMediaPlayer().setWakeMode(getBaseContext(),
+				PowerManager.PARTIAL_WAKE_LOCK);
 	}
 
 	@Override
 	public void onDestroy() {
+		this.mediaThread.end();
 		this.mediaThread.interrupt();
 		super.onDestroy();
 	}
@@ -44,6 +52,22 @@ public class MediaService extends CrankService {
 	public boolean onUnbind(Intent intent) {
 		// Nothing to do here
 		return super.onUnbind(intent);
+	}
+
+	public List<File> getPlaylist() {
+		return this.mediaThread.getPlaylist();
+	}
+
+	public void setPlaylist(List<File> playlist) {
+		this.mediaThread.setPlaylist(playlist);
+	}
+
+	public void play() {
+		this.mediaThread.play();
+	}
+
+	public void stop() {
+		this.mediaThread.stopPlayback();
 	}
 
 }

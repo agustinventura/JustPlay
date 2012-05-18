@@ -78,16 +78,16 @@ public class CrankPlayerActivity extends CrankListActivity {
 
 	public void clearPlaylist(View v) {
 		this.playlist.clear();
-		// TODO: here is also needed to clear mediaservice playlist
+		this.mediaServiceBinder.clearPlaylist();
 		renderPlaylist();
 	}
 
 	public void play(View v) {
-		// TODO: what should we do?
+		this.mediaServiceBinder.play();
 	}
 
 	public void stop(View v) {
-		// TODO: stop if playing or paused. Nothing if stopped.
+		this.mediaServiceBinder.stop();
 	}
 
 	private void renderPlaylist() {
@@ -99,12 +99,19 @@ public class CrankPlayerActivity extends CrankListActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (data.hasExtra("selectedFile")) {
-			this.playlist.add((File) data.getExtras().get("selectedFile"));
+			File selectedFile = (File) data.getExtras().get("selectedFile");
+			this.playlist.add(selectedFile);
 			this.renderPlaylist();
+			if (this.mediaServiceBinder != null) {
+				this.mediaServiceBinder.addToPlaylist(selectedFile);
+			}
 		} else if (data.hasExtra("selectedFiles")) {
-			List<File> fileList = (List<File>) data.getExtras().get(
+			List<File> selectedFiles = (List<File>) data.getExtras().get(
 					"selectedFiles");
-			this.playlist.addAll(fileList);
+			this.playlist.addAll(selectedFiles);
+			if (this.mediaServiceBinder != null) {
+				this.mediaServiceBinder.addToPlaylist(selectedFiles);
+			}
 			this.renderPlaylist();
 		}
 	}
