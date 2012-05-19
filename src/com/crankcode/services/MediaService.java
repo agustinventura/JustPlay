@@ -5,7 +5,6 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.IBinder;
-import android.os.PowerManager;
 
 import com.crankcode.services.binders.MediaServiceBinder;
 import com.crankcode.threads.MediaThread;
@@ -20,9 +19,6 @@ public class MediaService extends CrankService {
 		super.onCreate();
 		this.mediaThread = new MediaThread();
 		this.mediaThread.start();
-		// We need to set the CPU always awake
-		this.mediaThread.getMediaPlayer().setWakeMode(getBaseContext(),
-				PowerManager.PARTIAL_WAKE_LOCK);
 	}
 
 	@Override
@@ -68,6 +64,14 @@ public class MediaService extends CrankService {
 
 	public void stop() {
 		this.mediaThread.stopPlayback();
+	}
+
+	public void previousSong() {
+		this.mediaThread.previousSong();
+	}
+
+	public void nextSong() {
+		this.mediaThread.nextSong();
 	}
 
 }

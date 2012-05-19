@@ -34,4 +34,12 @@ public class MediaServiceBinder extends Binder {
 	public void clearPlaylist() {
 		this.mediaService.getPlaylist().clear();
 	}
+
+	public void previousSong() {
+		this.mediaService.previousSong();
+	}
+
+	public void nextSong() {
+		this.mediaService.nextSong();
+	}
 }

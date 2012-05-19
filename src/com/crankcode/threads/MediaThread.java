@@ -46,8 +46,10 @@ public class MediaThread extends Thread {
 	}
 
 	private void play(File file) {
-		this.stopPlayback();
 		try {
+			if (this.mediaPlayer.isPlaying()) {
+				this.mediaPlayer.stop();
+			}
 			this.mediaPlayer.reset();
 			this.mediaPlayer.setDataSource(file.getAbsolutePath());
 			this.mediaPlayer.prepare();
@@ -77,7 +79,7 @@ public class MediaThread extends Thread {
 		}
 	}
 
-	private void nextSong() {
+	public void nextSong() {
 		// Check if last song or not
 		if (++this.song >= this.playlist.size()) {
 			this.song = 0;
@@ -86,8 +88,8 @@ public class MediaThread extends Thread {
 		}
 	}
 
-	private void prevSong() {
-		if (this.mediaPlayer.getCurrentPosition() < 3000 && this.song >= 1) {
+	public void previousSong() {
+		if (this.song >= 1) {
 			play(playlist.get(--this.song));
 		} else {
 			play(this.playlist.get(this.song));

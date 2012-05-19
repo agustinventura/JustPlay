@@ -90,6 +90,14 @@ public class CrankPlayerActivity extends CrankListActivity {
 		this.mediaServiceBinder.stop();
 	}
 
+	public void previousSong(View v) {
+		this.mediaServiceBinder.previousSong();
+	}
+
+	public void nextSong(View v) {
+		this.mediaServiceBinder.nextSong();
+	}
+
 	private void renderPlaylist() {
 		ArrayAdapter<File> fileList = new ArrayAdapter<File>(this,
 				R.layout.file_row, playlist);
