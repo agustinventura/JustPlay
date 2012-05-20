@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 import com.crankcode.services.MediaService;
 import com.crankcode.services.binders.MediaServiceBinder;
@@ -20,6 +21,7 @@ public class CrankPlayerActivity extends CrankListActivity {
 	private final static int REQUEST_CODE = 101;
 	private final List<File> playlist = new ArrayList<File>();
 	private MediaServiceBinder mediaServiceBinder = null;
+	private int song = 0;
 
 	private final ServiceConnection mediaServiceConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
@@ -79,23 +81,50 @@ public class CrankPlayerActivity extends CrankListActivity {
 	public void clearPlaylist(View v) {
 		this.playlist.clear();
 		this.mediaServiceBinder.clearPlaylist();
+		this.song = 0;
 		renderPlaylist();
 	}
 
 	public void play(View v) {
 		this.mediaServiceBinder.play();
+		// We need to stablish here the current song info
+		this.renderCurrentSongInfo();
+	}
+
+	private void renderCurrentSongInfo() {
+		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
+		currentSongView.setText(this.playlist.get(this.song).getName());
 	}
 
 	public void stop(View v) {
 		this.mediaServiceBinder.stop();
+		this.song = 0;
+		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
+		currentSongView.setText("");
+	}
+
+	public void pause(View v) {
+		this.mediaServiceBinder.pause();
+		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
+		currentSongView.setText(currentSongView.getText() + " - "
+				+ getText(R.string.pause));
 	}
 
 	public void previousSong(View v) {
 		this.mediaServiceBinder.previousSong();
+		if (this.song > 0) {
+			--this.song;
+		}
+		this.renderCurrentSongInfo();
 	}
 
 	public void nextSong(View v) {
 		this.mediaServiceBinder.nextSong();
+		++this.song;
+		if (this.song >= this.playlist.size()) {
+			this.song = 0;
+		}
+		this.renderCurrentSongInfo();
 	}
 
 	private void renderPlaylist() {

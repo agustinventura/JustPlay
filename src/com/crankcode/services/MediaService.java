@@ -74,4 +74,8 @@ public class MediaService extends CrankService {
 		this.mediaThread.nextSong();
 	}
 
+	public void pause() {
+		this.mediaThread.pause();
+	}
+
 }

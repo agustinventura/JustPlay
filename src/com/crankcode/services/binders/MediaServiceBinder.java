@@ -42,4 +42,8 @@ public class MediaServiceBinder extends Binder {
 	public void nextSong() {
 		this.mediaService.nextSong();
 	}
+
+	public void pause() {
+		this.mediaService.pause();
+	}
 }
