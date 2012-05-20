@@ -1,8 +1,5 @@
 package com.crankcode.services;
 
-import java.io.File;
-import java.util.List;
-
 import android.content.Intent;
 import android.os.IBinder;
 
@@ -11,14 +8,16 @@ import com.crankcode.threads.MediaThread;
 
 public class MediaService extends CrankService {
 
-	private MediaThread mediaThread;
+	private MediaThread mediaThread = null;
 	private final IBinder mediaServiceBinder = new MediaServiceBinder(this);
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		this.mediaThread = new MediaThread();
-		this.mediaThread.start();
+		if (this.mediaThread == null) {
+			this.mediaThread = new MediaThread();
+			this.mediaThread.start();
+		}
 	}
 
 	@Override
@@ -50,32 +49,7 @@ public class MediaService extends CrankService {
 		return super.onUnbind(intent);
 	}
 
-	public List<File> getPlaylist() {
-		return this.mediaThread.getPlaylist();
+	public MediaThread getMediaThread() {
+		return this.mediaThread;
 	}
-
-	public void setPlaylist(List<File> playlist) {
-		this.mediaThread.setPlaylist(playlist);
-	}
-
-	public void play() {
-		this.mediaThread.play();
-	}
-
-	public void stop() {
-		this.mediaThread.stopPlayback();
-	}
-
-	public void previousSong() {
-		this.mediaThread.previousSong();
-	}
-
-	public void nextSong() {
-		this.mediaThread.nextSong();
-	}
-
-	public void pause() {
-		this.mediaThread.pause();
-	}
-
 }

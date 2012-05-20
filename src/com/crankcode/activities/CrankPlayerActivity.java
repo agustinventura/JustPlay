@@ -16,20 +16,28 @@ import android.widget.TextView;
 
 import com.crankcode.services.MediaService;
 import com.crankcode.services.binders.MediaServiceBinder;
+import com.crankcode.threads.MediaThread;
 
 public class CrankPlayerActivity extends CrankListActivity {
+
 	private final static int REQUEST_CODE = 101;
 	private final List<File> playlist = new ArrayList<File>();
 	private MediaServiceBinder mediaServiceBinder = null;
+	private MediaThread mediaThread = null;
 	private int song = 0;
 
 	private final ServiceConnection mediaServiceConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			mediaServiceBinder = (MediaServiceBinder) service;
+			if (mediaServiceBinder == null || mediaThread == null) {
+				mediaServiceBinder = (MediaServiceBinder) service;
+				mediaThread = mediaServiceBinder.getMediaService()
+						.getMediaThread();
+			}
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
 			mediaServiceBinder = null;
+			mediaThread = null;
 		}
 	};
 
@@ -80,50 +88,47 @@ public class CrankPlayerActivity extends CrankListActivity {
 
 	public void clearPlaylist(View v) {
 		this.playlist.clear();
-		this.mediaServiceBinder.clearPlaylist();
-		this.song = 0;
+		this.mediaThread.getPlaylist().clear();
 		renderPlaylist();
 	}
 
 	public void play(View v) {
-		this.mediaServiceBinder.play();
+		this.mediaThread.play();
 		// We need to stablish here the current song info
 		this.renderCurrentSongInfo();
 	}
 
-	private void renderCurrentSongInfo() {
-		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
-		currentSongView.setText(this.playlist.get(this.song).getName());
-	}
-
 	public void stop(View v) {
-		this.mediaServiceBinder.stop();
-		this.song = 0;
+		this.mediaThread.stopPlayback();
+		this.song = this.mediaThread.getSong();
 		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
 		currentSongView.setText("");
 	}
 
 	public void pause(View v) {
-		this.mediaServiceBinder.pause();
+		this.mediaThread.pause();
 		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
 		currentSongView.setText(currentSongView.getText() + " - "
 				+ getText(R.string.pause));
 	}
 
 	public void previousSong(View v) {
-		this.mediaServiceBinder.previousSong();
-		if (this.song > 0) {
-			--this.song;
-		}
+		this.mediaThread.previousSong();
 		this.renderCurrentSongInfo();
 	}
 
 	public void nextSong(View v) {
-		this.mediaServiceBinder.nextSong();
-		++this.song;
-		if (this.song >= this.playlist.size()) {
-			this.song = 0;
-		}
+		this.mediaThread.nextSong();
+		this.renderCurrentSongInfo();
+	}
+
+	public void rewind(View v) {
+		this.mediaThread.rewind();
+		this.renderCurrentSongInfo();
+	}
+
+	public void fastforward(View v) {
+		this.mediaThread.fastforward();
 		this.renderCurrentSongInfo();
 	}
 
@@ -133,6 +138,12 @@ public class CrankPlayerActivity extends CrankListActivity {
 		setListAdapter(fileList);
 	}
 
+	private void renderCurrentSongInfo() {
+		this.song = this.mediaThread.getSong();
+		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
+		currentSongView.setText(this.playlist.get(this.song).getName());
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (data.hasExtra("selectedFile")) {
@@ -140,14 +151,14 @@ public class CrankPlayerActivity extends CrankListActivity {
 			this.playlist.add(selectedFile);
 			this.renderPlaylist();
 			if (this.mediaServiceBinder != null) {
-				this.mediaServiceBinder.addToPlaylist(selectedFile);
+				this.mediaThread.getPlaylist().add(selectedFile);
 			}
 		} else if (data.hasExtra("selectedFiles")) {
 			List<File> selectedFiles = (List<File>) data.getExtras().get(
 					"selectedFiles");
 			this.playlist.addAll(selectedFiles);
 			if (this.mediaServiceBinder != null) {
-				this.mediaServiceBinder.addToPlaylist(selectedFiles);
+				this.mediaThread.getPlaylist().addAll(selectedFiles);
 			}
 			this.renderPlaylist();
 		}

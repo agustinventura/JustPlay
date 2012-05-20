@@ -16,6 +16,7 @@ public class MediaThread extends Thread {
 	private List<File> playlist = new ArrayList<File>();
 	private int song = 0;
 	private boolean pause = false;
+	private final int seekMiliseconds = 15000;
 
 	@Override
 	public void run() {
@@ -35,8 +36,8 @@ public class MediaThread extends Thread {
 		return playlist;
 	}
 
-	public void setPlaylist(List<File> playlist) {
-		this.playlist = playlist;
+	public int getSong() {
+		return this.song;
 	}
 
 	public void play() {
@@ -67,14 +68,11 @@ public class MediaThread extends Thread {
 			}
 			this.pause = false;
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
 		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
 		}
 	}
 
@@ -116,6 +114,27 @@ public class MediaThread extends Thread {
 	public void pause() {
 		this.pause = true;
 		this.mediaPlayer.pause();
+	}
+
+	public void rewind() {
+		int songPosition = this.mediaPlayer.getCurrentPosition();
+		if ((songPosition - this.seekMiliseconds) < 0) {
+			this.previousSong();
+		} else {
+			this.mediaPlayer.seekTo(-this.seekMiliseconds);
+		}
+
+	}
+
+	public void fastforward() {
+		int songPosition = this.mediaPlayer.getCurrentPosition();
+		if ((songPosition + this.seekMiliseconds) > this.mediaPlayer
+				.getDuration()) {
+			this.nextSong();
+		} else {
+			this.mediaPlayer.seekTo(this.seekMiliseconds);
+		}
+
 	}
 
 }

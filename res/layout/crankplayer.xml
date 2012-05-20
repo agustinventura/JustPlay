@@ -69,12 +69,20 @@
         android:orientation="horizontal">
     
     <Button
+        android:id="@+id/rewind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/rewind"
+        android:onClick="rewind" 
+        android:layout_weight="1"/>
+	    
+    <Button
         android:id="@+id/prevSong"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/prev_song"
         android:onClick="previousSong" 
-        android:layout_weight="1"/>
+        android:layout_weight="2"/>
 	    
     <Button
         android:id="@+id/play"
@@ -82,7 +90,7 @@
         android:layout_height="wrap_content"
         android:text="@string/play"
         android:onClick="play" 
-        android:layout_weight="1"/>
+        android:layout_weight="2"/>
     
     <Button
         android:id="@+id/pause"
@@ -98,7 +106,7 @@
         android:layout_height="wrap_content"
         android:text="@string/stop"
         android:onClick="stop" 
-        android:layout_weight="1"/>
+        android:layout_weight="2"/>
     
     <Button
         android:id="@+id/nextSong"
@@ -106,6 +114,14 @@
         android:layout_height="wrap_content"
         android:text="@string/next_song"
         android:onClick="nextSong" 
+        android:layout_weight="2"/>
+    
+    <Button
+        android:id="@+id/fastforward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/fastforward"
+        android:onClick="fastforward" 
         android:layout_weight="1"/>
 	</LinearLayout>
 </LinearLayout>
