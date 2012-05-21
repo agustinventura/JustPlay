@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.crankcode.services.MediaService;
 import com.crankcode.services.binders.MediaServiceBinder;
 import com.crankcode.threads.MediaThread;
+import com.crankcode.utils.MediaStatus;
 
 public class CrankPlayerActivity extends CrankListActivity {
 
@@ -25,6 +26,7 @@ public class CrankPlayerActivity extends CrankListActivity {
 	private MediaServiceBinder mediaServiceBinder = null;
 	private MediaThread mediaThread = null;
 	private int song = 0;
+	private MediaStatus status = null;
 
 	private final ServiceConnection mediaServiceConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
@@ -32,6 +34,7 @@ public class CrankPlayerActivity extends CrankListActivity {
 				mediaServiceBinder = (MediaServiceBinder) service;
 				mediaThread = mediaServiceBinder.getMediaService()
 						.getMediaThread();
+				status = mediaThread.getStatus();
 			}
 		}
 
@@ -76,8 +79,10 @@ public class CrankPlayerActivity extends CrankListActivity {
 
 	@Override
 	public void onDestroy() {
-		Intent intent = new Intent(getBaseContext(), MediaService.class);
-		stopService(intent);
+		if (!this.status.equals(MediaStatus.PLAYING)) {
+			Intent intent = new Intent(getBaseContext(), MediaService.class);
+			stopService(intent);
+		}
 		super.onDestroy();
 	}
 
@@ -94,12 +99,14 @@ public class CrankPlayerActivity extends CrankListActivity {
 
 	public void play(View v) {
 		this.mediaThread.play();
+		this.status = this.mediaThread.getStatus();
 		// We need to stablish here the current song info
 		this.renderCurrentSongInfo();
 	}
 
 	public void stop(View v) {
 		this.mediaThread.stopPlayback();
+		this.status = this.mediaThread.getStatus();
 		this.song = this.mediaThread.getSong();
 		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
 		currentSongView.setText("");
@@ -107,6 +114,7 @@ public class CrankPlayerActivity extends CrankListActivity {
 
 	public void pause(View v) {
 		this.mediaThread.pause();
+		this.status = this.mediaThread.getStatus();
 		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
 		currentSongView.setText(currentSongView.getText() + " - "
 				+ getText(R.string.pause));
