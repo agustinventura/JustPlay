@@ -76,12 +76,15 @@ public class MediaThread extends Thread {
 		} catch (IllegalArgumentException e) {
 			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
 			this.status = MediaStatus.ERROR;
+			this.mediaPlayer.reset();
 		} catch (IllegalStateException e) {
 			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
 			this.status = MediaStatus.ERROR;
+			this.mediaPlayer.reset();
 		} catch (IOException e) {
 			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
 			this.status = MediaStatus.ERROR;
+			this.mediaPlayer.reset();
 		}
 		return this.status;
 	}
