@@ -48,81 +48,58 @@ public class MediaThread extends Thread {
 	public MediaStatus play() {
 		this.stopPlayback();
 		if (!this.playlist.isEmpty()) {
-			this.play(this.playlist.get(song));
+			this.song = 0;
+			this.play(this.song);
 		}
 		return this.status;
 	}
 
-	private MediaStatus play(File file) {
+	public MediaStatus play(int songPosition) {
 		try {
-			if (!this.status.equals(MediaStatus.PAUSED)) {
-				if (this.mediaPlayer.isPlaying()) {
-					this.mediaPlayer.stop();
+			if (songPosition > -1 && songPosition < this.playlist.size()) {
+				this.song = songPosition;
+				File selectedSong = this.playlist.get(songPosition);
+				if (!this.status.equals(MediaStatus.PAUSED)) {
+					if (this.mediaPlayer.isPlaying()) {
+						this.mediaPlayer.stop();
+					}
+					this.mediaPlayer.reset();
+					this.mediaPlayer.setDataSource(selectedSong
+							.getAbsolutePath());
+					this.mediaPlayer.prepare();
+					this.mediaPlayer.start();
+					this.mediaPlayer
+							.setOnCompletionListener(new OnCompletionListener() {
+								public void onCompletion(MediaPlayer arg0) {
+									nextSong();
+								}
+							});
+				} else {
+					this.mediaPlayer.start();
 				}
-				this.mediaPlayer.reset();
-				this.mediaPlayer.setDataSource(file.getAbsolutePath());
-				this.mediaPlayer.prepare();
-				this.mediaPlayer.start();
-				this.mediaPlayer
-						.setOnCompletionListener(new OnCompletionListener() {
-							public void onCompletion(MediaPlayer arg0) {
-								nextSong();
-							}
-						});
-			} else {
-				this.mediaPlayer.start();
+				this.status = MediaStatus.PLAYING;
 			}
-			this.status = MediaStatus.PLAYING;
 		} catch (IllegalArgumentException e) {
 			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
 			this.status = MediaStatus.ERROR;
-			this.mediaPlayer.reset();
 		} catch (IllegalStateException e) {
 			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
 			this.status = MediaStatus.ERROR;
-			this.mediaPlayer.reset();
 		} catch (IOException e) {
 			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
 			this.status = MediaStatus.ERROR;
-			this.mediaPlayer.reset();
 		}
 		return this.status;
 	}
 
 	public MediaStatus stopPlayback() {
-		if (this.mediaPlayer.isPlaying()) {
+		if (this.status.equals(MediaStatus.PLAYING)
+				|| this.status.equals(MediaStatus.PAUSED)) {
 			this.mediaPlayer.stop();
 			this.song = 0;
 			this.status = MediaStatus.STOPPED;
 		}
-
 		return this.status;
-	}
-
-	public MediaStatus nextSong() {
-		// Check if last song or not
-		++this.song;
-		if (this.song >= this.playlist.size()) {
-			this.song = 0;
-		}
-		return play(this.playlist.get(this.song));
-	}
-
-	public MediaStatus previousSong() {
-		if (this.song > 0) {
-			--this.song;
-		}
-		return play(this.playlist.get(this.song));
-	}
-
-	public void end() {
-		this.stopPlayback();
-		this.playlist.clear();
-		this.mediaPlayer.release();
-		// We make sure playlist and mediaPlayer are eligible for garbage
-		// collection
-		this.playlist = null;
-		this.mediaPlayer = null;
 	}
 
 	public MediaStatus pause() {
@@ -152,6 +129,32 @@ public class MediaThread extends Thread {
 					+ this.seekMiliseconds);
 		}
 		return this.status;
+	}
+
+	public MediaStatus nextSong() {
+		// Check if last song or not
+		++this.song;
+		if (this.song >= this.playlist.size()) {
+			this.song = 0;
+		}
+		return play(this.song);
+	}
+
+	public MediaStatus previousSong() {
+		if (this.song > 0) {
+			--this.song;
+		}
+		return play(this.song);
+	}
+
+	public void end() {
+		this.stopPlayback();
+		this.playlist.clear();
+		this.mediaPlayer.release();
+		// We make sure playlist and mediaPlayer are eligible for garbage
+		// collection
+		this.playlist = null;
+		this.mediaPlayer = null;
 	}
 
 }

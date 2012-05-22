@@ -4,14 +4,19 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.crankcode.services.MediaService;
@@ -86,6 +91,13 @@ public class CrankPlayerActivity extends CrankListActivity {
 		super.onDestroy();
 	}
 
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		this.song = position;
+		this.status = this.mediaThread.play(this.song);
+		this.renderCurrentSongInfo();
+	}
+
 	public void openCrankExplorer(View v) {
 		Intent openCrankExplorer = new Intent(this, CrankExplorer.class);
 		startActivityForResult(openCrankExplorer, REQUEST_CODE);
@@ -98,26 +110,23 @@ public class CrankPlayerActivity extends CrankListActivity {
 	}
 
 	public void play(View v) {
-		this.mediaThread.play();
-		this.status = this.mediaThread.getStatus();
-		// We need to stablish here the current song info
+		this.status = this.mediaThread.play();
 		this.renderCurrentSongInfo();
 	}
 
 	public void stop(View v) {
-		this.mediaThread.stopPlayback();
-		this.status = this.mediaThread.getStatus();
+		this.status = this.mediaThread.stopPlayback();
 		this.song = this.mediaThread.getSong();
-		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
-		currentSongView.setText("");
+		this.renderCurrentSongInfo();
 	}
 
 	public void pause(View v) {
-		this.mediaThread.pause();
-		this.status = this.mediaThread.getStatus();
-		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
-		currentSongView.setText(currentSongView.getText() + " - "
-				+ getText(R.string.pause));
+		if (this.status.equals(MediaStatus.PLAYING)) {
+			this.status = this.mediaThread.pause();
+		} else {
+			this.status = this.mediaThread.play(this.song);
+		}
+		this.renderCurrentSongInfo();
 	}
 
 	public void previousSong(View v) {
@@ -149,7 +158,41 @@ public class CrankPlayerActivity extends CrankListActivity {
 	private void renderCurrentSongInfo() {
 		this.song = this.mediaThread.getSong();
 		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
-		currentSongView.setText(this.playlist.get(this.song).getName());
+		if (this.status.equals(MediaStatus.PLAYING)) {
+			currentSongView.setText(this.playlist.get(this.song).getName());
+		} else if (this.status.equals(MediaStatus.PAUSED)) {
+			currentSongView.setText(getText(R.string.pause) + " - "
+					+ this.playlist.get(this.song).getName());
+		} else if (this.status.equals(MediaStatus.STOPPED)) {
+			currentSongView.setText(R.string.stop);
+		} else if (this.status.equals(MediaStatus.ERROR)) {
+			this.showErrorDialog();
+		}
+	}
+
+	private void showErrorDialog() {
+		Builder builder = new AlertDialog.Builder(this);
+		String errorMessage = this.getText(R.string.play_error).toString();
+		errorMessage = errorMessage.replace("##songName##",
+				this.playlist.get(this.song).getName());
+		builder.setMessage(errorMessage);
+		builder.setCancelable(true);
+		builder.setPositiveButton(R.string.yes, new OnClickListener() {
+			public void onClick(DialogInterface dialog, int button) {
+				playlist.remove(song);
+				mediaThread.getPlaylist().remove(song);
+				status = MediaStatus.STOPPED;
+				renderCurrentSongInfo();
+				renderPlaylist();
+			}
+		});
+		builder.setNegativeButton(R.string.no, new OnClickListener() {
+			public void onClick(DialogInterface dialog, int button) {
+				dialog.cancel();
+			}
+		});
+		AlertDialog errorDialog = builder.create();
+		errorDialog.show();
 	}
 
 	@Override

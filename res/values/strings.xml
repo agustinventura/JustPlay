@@ -19,6 +19,7 @@
 	<string name="next_song">Next</string>
 	<string name="rewind">rwd</string>
 	<string name="fastforward">ffw</string>
+	<string name="play_error">Error playing ##songName##, do you wish to remove it from the playlist?</string>
 	
 	<string name="crankexplorer_welcome">Welcome to CrankExplorer, please choose a file.</string>
 	<string name="directory">Directory: </string>
