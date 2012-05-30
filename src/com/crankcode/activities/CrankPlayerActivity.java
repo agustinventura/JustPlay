@@ -14,7 +14,12 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -56,6 +61,7 @@ public class CrankPlayerActivity extends CrankListActivity {
 		setContentView(R.layout.crankplayer);
 		Intent intent = new Intent(getBaseContext(), MediaService.class);
 		startService(intent);
+		registerForContextMenu(getListView());
 		this.renderPlaylist();
 	}
 
@@ -96,6 +102,34 @@ public class CrankPlayerActivity extends CrankListActivity {
 		this.song = position;
 		this.status = this.mediaThread.play(this.song);
 		this.renderCurrentSongInfo();
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.crankplayer_context, menu);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
+		switch (item.getItemId()) {
+		case R.id.playSong:
+			this.song = (int) info.id;
+			this.status = this.mediaThread.play(this.song);
+			this.renderCurrentSongInfo();
+			return true;
+		case R.id.removeSong:
+			this.song = (int) info.id;
+			this.playlist.remove(song);
+			this.mediaThread.getPlaylist().remove(song);
+			this.renderPlaylist();
+		default:
+			return super.onContextItemSelected(item);
+		}
 	}
 
 	public void openCrankExplorer(View v) {
