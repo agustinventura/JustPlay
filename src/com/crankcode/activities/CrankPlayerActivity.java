@@ -27,12 +27,15 @@ import android.widget.TextView;
 import com.crankcode.services.MediaService;
 import com.crankcode.services.binders.MediaServiceBinder;
 import com.crankcode.threads.MediaThread;
+import com.crankcode.utils.ID3Reader;
 import com.crankcode.utils.MediaStatus;
 
 public class CrankPlayerActivity extends CrankListActivity {
 
 	private final static int REQUEST_CODE = 101;
 	private final List<File> playlist = new ArrayList<File>();
+	private final List<String> titles = new ArrayList<String>();
+	private final ID3Reader id3Reader = new ID3Reader();
 	private MediaServiceBinder mediaServiceBinder = null;
 	private MediaThread mediaThread = null;
 	private int song = 0;
@@ -124,8 +127,9 @@ public class CrankPlayerActivity extends CrankListActivity {
 			return true;
 		case R.id.removeSong:
 			this.song = (int) info.id;
-			this.playlist.remove(song);
-			this.mediaThread.getPlaylist().remove(song);
+			this.playlist.remove(this.song);
+			this.titles.remove(this.song);
+			this.mediaThread.getPlaylist().remove(this.song);
 			this.renderPlaylist();
 		default:
 			return super.onContextItemSelected(item);
@@ -139,6 +143,7 @@ public class CrankPlayerActivity extends CrankListActivity {
 
 	public void clearPlaylist(View v) {
 		this.playlist.clear();
+		this.titles.clear();
 		this.mediaThread.getPlaylist().clear();
 		renderPlaylist();
 	}
@@ -184,8 +189,8 @@ public class CrankPlayerActivity extends CrankListActivity {
 	}
 
 	private void renderPlaylist() {
-		ArrayAdapter<File> fileList = new ArrayAdapter<File>(this,
-				R.layout.file_row, playlist);
+		ArrayAdapter<String> fileList = new ArrayAdapter<String>(this,
+				R.layout.file_row, this.titles);
 		setListAdapter(fileList);
 	}
 
@@ -193,10 +198,10 @@ public class CrankPlayerActivity extends CrankListActivity {
 		this.song = this.mediaThread.getSong();
 		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
 		if (this.status.equals(MediaStatus.PLAYING)) {
-			currentSongView.setText(this.playlist.get(this.song).getName());
+			currentSongView.setText(this.titles.get(this.song));
 		} else if (this.status.equals(MediaStatus.PAUSED)) {
 			currentSongView.setText(getText(R.string.pause) + " - "
-					+ this.playlist.get(this.song).getName());
+					+ this.titles.get(this.song));
 		} else if (this.status.equals(MediaStatus.STOPPED)) {
 			currentSongView.setText(R.string.stop);
 		} else if (this.status.equals(MediaStatus.ERROR)) {
@@ -234,6 +239,7 @@ public class CrankPlayerActivity extends CrankListActivity {
 		if (data.hasExtra("selectedFile")) {
 			File selectedFile = (File) data.getExtras().get("selectedFile");
 			this.playlist.add(selectedFile);
+			this.titles.add(this.id3Reader.procesar(selectedFile));
 			this.renderPlaylist();
 			if (this.mediaServiceBinder != null) {
 				this.mediaThread.getPlaylist().add(selectedFile);
@@ -242,6 +248,7 @@ public class CrankPlayerActivity extends CrankListActivity {
 			List<File> selectedFiles = (List<File>) data.getExtras().get(
 					"selectedFiles");
 			this.playlist.addAll(selectedFiles);
+			this.titles.addAll(id3Reader.procesar(selectedFiles));
 			if (this.mediaServiceBinder != null) {
 				this.mediaThread.getPlaylist().addAll(selectedFiles);
 			}
