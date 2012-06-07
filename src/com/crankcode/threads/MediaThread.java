@@ -56,29 +56,22 @@ public class MediaThread extends Thread {
 
 	public MediaStatus play(int songPosition) {
 		try {
-			if (songPosition > -1 && songPosition < this.playlist.size()) {
-				this.song = songPosition;
-				File selectedSong = this.playlist.get(songPosition);
-				if (!this.status.equals(MediaStatus.PAUSED)) {
-					if (this.mediaPlayer.isPlaying()) {
-						this.mediaPlayer.stop();
-					}
-					this.mediaPlayer.reset();
-					this.mediaPlayer.setDataSource(selectedSong
-							.getAbsolutePath());
-					this.mediaPlayer.prepare();
-					this.mediaPlayer.start();
-					this.mediaPlayer
-							.setOnCompletionListener(new OnCompletionListener() {
-								public void onCompletion(MediaPlayer arg0) {
-									nextSong();
-								}
-							});
-				} else {
-					this.mediaPlayer.start();
-				}
-				this.status = MediaStatus.PLAYING;
+			File selectedSong = this.playlist.get(songPosition);
+			if (this.mediaPlayer.isPlaying()) {
+				this.mediaPlayer.stop();
 			}
+			this.mediaPlayer.reset();
+			this.mediaPlayer.setDataSource(selectedSong.getAbsolutePath());
+			this.mediaPlayer.prepare();
+			this.mediaPlayer.start();
+			this.mediaPlayer
+					.setOnCompletionListener(new OnCompletionListener() {
+						public void onCompletion(MediaPlayer arg0) {
+							nextSong();
+						}
+					});
+
+			this.status = MediaStatus.PLAYING;
 		} catch (IllegalArgumentException e) {
 			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
 			this.status = MediaStatus.ERROR;

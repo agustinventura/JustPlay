@@ -2,6 +2,7 @@ package com.crankcode.activities;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -51,6 +52,7 @@ public class CrankExplorer extends CrankListActivity {
 		path = new ArrayList<String>();
 		File f = new File(dirPath);
 		File[] files = f.listFiles(mediaFileFilter);
+		Arrays.sort(files);
 		if (!dirPath.equals(root)) {
 			item.add(root);
 			path.add(root);

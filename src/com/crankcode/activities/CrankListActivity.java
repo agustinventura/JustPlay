@@ -49,4 +49,10 @@ public class CrankListActivity extends ListActivity {
 		super.onLowMemory();
 		CrankLog.w(this, "onLowMemory()");
 	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		CrankLog.v(this, "onSaveInstaceState()");
+	}
 }

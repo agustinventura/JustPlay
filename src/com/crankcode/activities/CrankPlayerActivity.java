@@ -1,6 +1,7 @@
 package com.crankcode.activities;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,7 +66,11 @@ public class CrankPlayerActivity extends CrankListActivity {
 		Intent intent = new Intent(getBaseContext(), MediaService.class);
 		startService(intent);
 		registerForContextMenu(getListView());
+		if (savedInstanceState != null) {
+			this.restoreState(savedInstanceState);
+		}
 		this.renderPlaylist();
+		this.renderCurrentSongInfo();
 	}
 
 	@Override
@@ -98,6 +103,33 @@ public class CrankPlayerActivity extends CrankListActivity {
 			stopService(intent);
 		}
 		super.onDestroy();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable("playlist", (Serializable) this.playlist);
+		outState.putSerializable("titles", (Serializable) this.titles);
+		outState.putInt("song", this.song);
+		outState.putSerializable("status", this.status);
+		super.onSaveInstanceState(outState);
+	}
+
+	private void restoreState(Bundle savedInstanceState) {
+		if (savedInstanceState.containsKey("playlist")) {
+			List<File> savedPlaylist = (List<File>) savedInstanceState
+					.get("playlist");
+			List<String> savedTitles = (List<String>) savedInstanceState
+					.get("titles");
+			int savedSong = savedInstanceState.getInt("song");
+			MediaStatus savedStatus = (MediaStatus) savedInstanceState
+					.get("status");
+			if (!savedPlaylist.isEmpty()) {
+				this.playlist.addAll(savedPlaylist);
+				this.titles.addAll(savedTitles);
+				this.song = savedSong;
+				this.status = savedStatus;
+			}
+		}
 	}
 
 	@Override
@@ -169,22 +201,26 @@ public class CrankPlayerActivity extends CrankListActivity {
 	}
 
 	public void previousSong(View v) {
-		this.mediaThread.previousSong();
+		this.status = this.mediaThread.previousSong();
+		this.song = this.mediaThread.getSong();
 		this.renderCurrentSongInfo();
 	}
 
 	public void nextSong(View v) {
-		this.mediaThread.nextSong();
+		this.status = this.mediaThread.nextSong();
+		this.song = this.mediaThread.getSong();
 		this.renderCurrentSongInfo();
 	}
 
 	public void rewind(View v) {
-		this.mediaThread.rewind();
+		this.status = this.mediaThread.rewind();
+		this.song = this.mediaThread.getSong();
 		this.renderCurrentSongInfo();
 	}
 
 	public void fastforward(View v) {
-		this.mediaThread.fastforward();
+		this.status = this.mediaThread.fastforward();
+		this.song = this.mediaThread.getSong();
 		this.renderCurrentSongInfo();
 	}
 
@@ -195,7 +231,6 @@ public class CrankPlayerActivity extends CrankListActivity {
 	}
 
 	private void renderCurrentSongInfo() {
-		this.song = this.mediaThread.getSong();
 		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
 		if (this.status.equals(MediaStatus.PLAYING)) {
 			currentSongView.setText(this.titles.get(this.song));
