@@ -40,7 +40,7 @@ public class CrankPlayerActivity extends CrankListActivity {
 	private MediaServiceBinder mediaServiceBinder = null;
 	private MediaThread mediaThread = null;
 	private int song = 0;
-	private MediaStatus status = null;
+	private MediaStatus status = MediaStatus.STOPPED;
 
 	private final ServiceConnection mediaServiceConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
@@ -69,8 +69,6 @@ public class CrankPlayerActivity extends CrankListActivity {
 		if (savedInstanceState != null) {
 			this.restoreState(savedInstanceState);
 		}
-		this.renderPlaylist();
-		this.renderCurrentSongInfo();
 	}
 
 	@Override
@@ -83,12 +81,13 @@ public class CrankPlayerActivity extends CrankListActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		this.updateStatus();
 	}
 
 	@Override
 	public void onPause() {
-		unbindService(mediaServiceConnection);
 		super.onPause();
+		unbindService(mediaServiceConnection);
 	}
 
 	@Override
@@ -98,11 +97,12 @@ public class CrankPlayerActivity extends CrankListActivity {
 
 	@Override
 	public void onDestroy() {
-		if (!this.status.equals(MediaStatus.PLAYING)) {
+		super.onDestroy();
+		if (!this.status.equals(MediaStatus.PLAYING)
+				&& !this.status.equals(MediaStatus.PAUSED)) {
 			Intent intent = new Intent(getBaseContext(), MediaService.class);
 			stopService(intent);
 		}
-		super.onDestroy();
 	}
 
 	@Override
@@ -128,15 +128,16 @@ public class CrankPlayerActivity extends CrankListActivity {
 				this.titles.addAll(savedTitles);
 				this.song = savedSong;
 				this.status = savedStatus;
+				this.renderCurrentSongInfo();
+				this.renderPlaylist();
 			}
 		}
 	}
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		this.song = position;
-		this.status = this.mediaThread.play(this.song);
-		this.renderCurrentSongInfo();
+		this.mediaThread.play(position);
+		this.updateStatus();
 	}
 
 	@Override
@@ -153,16 +154,16 @@ public class CrankPlayerActivity extends CrankListActivity {
 				.getMenuInfo();
 		switch (item.getItemId()) {
 		case R.id.playSong:
-			this.song = (int) info.id;
-			this.status = this.mediaThread.play(this.song);
-			this.renderCurrentSongInfo();
+			this.mediaThread.play((int) info.id);
+			this.updateStatus();
 			return true;
 		case R.id.removeSong:
-			this.song = (int) info.id;
-			this.playlist.remove(this.song);
-			this.titles.remove(this.song);
-			this.mediaThread.getPlaylist().remove(this.song);
+			int songToRemove = (int) info.id;
+			this.playlist.remove(songToRemove);
+			this.titles.remove(songToRemove);
+			this.mediaThread.getPlaylist().remove(songToRemove);
 			this.renderPlaylist();
+			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
@@ -176,58 +177,65 @@ public class CrankPlayerActivity extends CrankListActivity {
 	public void clearPlaylist(View v) {
 		this.playlist.clear();
 		this.titles.clear();
-		this.mediaThread.getPlaylist().clear();
-		renderPlaylist();
+		this.mediaThread.clearPlaylist();
+		this.song = 0;
+		this.renderPlaylist();
 	}
 
 	public void play(View v) {
-		this.status = this.mediaThread.play();
-		this.renderCurrentSongInfo();
+		this.mediaThread.play();
+		this.updateStatus();
 	}
 
 	public void stop(View v) {
-		this.status = this.mediaThread.stopPlayback();
-		this.song = this.mediaThread.getSong();
-		this.renderCurrentSongInfo();
+		this.mediaThread.stopPlayback();
+		this.updateStatus();
 	}
 
 	public void pause(View v) {
 		if (this.status.equals(MediaStatus.PLAYING)) {
-			this.status = this.mediaThread.pause();
+			this.mediaThread.pause();
 		} else {
-			this.status = this.mediaThread.play(this.song);
+			this.mediaThread.play(this.song);
 		}
-		this.renderCurrentSongInfo();
+		this.updateStatus();
 	}
 
 	public void previousSong(View v) {
-		this.status = this.mediaThread.previousSong();
-		this.song = this.mediaThread.getSong();
-		this.renderCurrentSongInfo();
+		this.mediaThread.previousSong();
+		this.updateStatus();
 	}
 
 	public void nextSong(View v) {
-		this.status = this.mediaThread.nextSong();
-		this.song = this.mediaThread.getSong();
-		this.renderCurrentSongInfo();
+		this.mediaThread.nextSong();
+		this.updateStatus();
 	}
 
 	public void rewind(View v) {
-		this.status = this.mediaThread.rewind();
-		this.song = this.mediaThread.getSong();
-		this.renderCurrentSongInfo();
+		this.mediaThread.rewind();
+		this.updateStatus();
 	}
 
 	public void fastforward(View v) {
-		this.status = this.mediaThread.fastforward();
-		this.song = this.mediaThread.getSong();
-		this.renderCurrentSongInfo();
+		this.mediaThread.fastforward();
+		this.updateStatus();
 	}
 
 	private void renderPlaylist() {
 		ArrayAdapter<String> fileList = new ArrayAdapter<String>(this,
 				R.layout.file_row, this.titles);
 		setListAdapter(fileList);
+	}
+
+	private void updateStatus() {
+		if (this.mediaThread != null) {
+			this.song = this.mediaThread.getSong();
+			this.status = this.mediaThread.getStatus();
+		} else {
+			this.song = 0;
+			this.status = MediaStatus.STOPPED;
+		}
+		this.renderCurrentSongInfo();
 	}
 
 	private void renderCurrentSongInfo() {

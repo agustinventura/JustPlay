@@ -1,6 +1,7 @@
 package com.crankcode.activities;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,11 +26,13 @@ import com.crankcode.utils.MediaFileFilter;
 
 public class CrankExplorer extends CrankListActivity {
 
-	private List<String> item = null;
+	private final List<String> item = new ArrayList<String>();
 
-	private List<String> path = null;
+	private final List<String> path = new ArrayList<String>();
 
 	private final String root = "/";
+
+	private File position = null;
 
 	private final MediaFileFilter mediaFileFilter = new MediaFileFilter();
 
@@ -40,24 +43,49 @@ public class CrankExplorer extends CrankListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (savedInstanceState != null) {
+			this.restoreState(savedInstanceState);
+		}
 		setContentView(R.layout.crankexplorer);
 		myPath = (TextView) findViewById(R.id.path);
-		getDir(root);
+		if (position == null) {
+			getDir(root);
+		} else {
+			getDir(this.position.getPath());
+		}
 		registerForContextMenu(getListView());
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable("item", (Serializable) item);
+		outState.putSerializable("path", (Serializable) path);
+		outState.putSerializable("position", position);
+		super.onSaveInstanceState(outState);
+	}
+
+	private void restoreState(Bundle savedInstanceState) {
+		if (savedInstanceState.containsKey("item")) {
+			this.item.addAll((List<String>) savedInstanceState
+					.getSerializable("item"));
+			this.path.addAll((List<String>) savedInstanceState
+					.getSerializable("path"));
+			this.position = (File) savedInstanceState.get("position");
+		}
 	}
 
 	private void getDir(String dirPath) {
 		myPath.setText(getResources().getString(R.string.directory) + dirPath);
-		item = new ArrayList<String>();
-		path = new ArrayList<String>();
-		File f = new File(dirPath);
-		File[] files = f.listFiles(mediaFileFilter);
+		this.item.clear();
+		this.path.clear();
+		this.position = new File(dirPath);
+		File[] files = position.listFiles(mediaFileFilter);
 		Arrays.sort(files);
 		if (!dirPath.equals(root)) {
 			item.add(root);
 			path.add(root);
 			item.add("../");
-			path.add(f.getParent());
+			path.add(position.getParent());
 		}
 
 		for (File file : files) {

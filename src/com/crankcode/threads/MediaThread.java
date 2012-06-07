@@ -48,7 +48,6 @@ public class MediaThread extends Thread {
 	public MediaStatus play() {
 		this.stopPlayback();
 		if (!this.playlist.isEmpty()) {
-			this.song = 0;
 			this.play(this.song);
 		}
 		return this.status;
@@ -56,6 +55,7 @@ public class MediaThread extends Thread {
 
 	public MediaStatus play(int songPosition) {
 		try {
+			this.song = songPosition;
 			File selectedSong = this.playlist.get(songPosition);
 			if (this.mediaPlayer.isPlaying()) {
 				this.mediaPlayer.stop();
@@ -138,6 +138,11 @@ public class MediaThread extends Thread {
 			--this.song;
 		}
 		return play(this.song);
+	}
+
+	public void clearPlaylist() {
+		this.playlist.clear();
+		this.song = 0;
 	}
 
 	public void end() {
