@@ -35,7 +35,8 @@
  	    android:id="@+id/playlist"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/playlistButtons">
+        android:layout_below="@+id/playlistButtons"
+        android:layout_above="@+id/current_song">
 	    <ListView
 	        android:id="@android:id/list"
 	        android:layout_width="fill_parent"

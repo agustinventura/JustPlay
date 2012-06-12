@@ -41,31 +41,17 @@ public class CrankPlayerActivity extends CrankListActivity {
 	private MediaThread mediaThread = null;
 	private int song = 0;
 	private MediaStatus status = MediaStatus.STOPPED;
-
-	private final ServiceConnection mediaServiceConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			if (mediaServiceBinder == null || mediaThread == null) {
-				mediaServiceBinder = (MediaServiceBinder) service;
-				mediaThread = mediaServiceBinder.getMediaService()
-						.getMediaThread();
-				status = mediaThread.getStatus();
-			}
-		}
-
-		public void onServiceDisconnected(ComponentName className) {
-			mediaServiceBinder = null;
-			mediaThread = null;
-		}
-	};
+	private final ServiceConnection mediaServiceConnection = new MediaServiceConnection();
+	private final ErrorDialogClickListener errorDialogClickListener = new ErrorDialogClickListener();
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.crankplayer);
+		this.setContentView(R.layout.crankplayer);
 		Intent intent = new Intent(getBaseContext(), MediaService.class);
-		startService(intent);
-		registerForContextMenu(getListView());
+		this.startService(intent);
+		this.registerForContextMenu(getListView());
 		if (savedInstanceState != null) {
 			this.restoreState(savedInstanceState);
 		}
@@ -75,7 +61,8 @@ public class CrankPlayerActivity extends CrankListActivity {
 	public void onStart() {
 		super.onStart();
 		Intent intent = new Intent(this, MediaService.class);
-		bindService(intent, mediaServiceConnection, Context.BIND_AUTO_CREATE);
+		this.bindService(intent, mediaServiceConnection,
+				Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -87,22 +74,22 @@ public class CrankPlayerActivity extends CrankListActivity {
 	@Override
 	public void onPause() {
 		super.onPause();
-		unbindService(mediaServiceConnection);
 	}
 
 	@Override
 	public void onStop() {
+		this.unbindService(mediaServiceConnection);
 		super.onStop();
 	}
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
 		if (!this.status.equals(MediaStatus.PLAYING)
 				&& !this.status.equals(MediaStatus.PAUSED)) {
 			Intent intent = new Intent(getBaseContext(), MediaService.class);
-			stopService(intent);
+			this.stopService(intent);
 		}
+		super.onDestroy();
 	}
 
 	@Override
@@ -159,19 +146,23 @@ public class CrankPlayerActivity extends CrankListActivity {
 			return true;
 		case R.id.removeSong:
 			int songToRemove = (int) info.id;
-			this.playlist.remove(songToRemove);
-			this.titles.remove(songToRemove);
-			this.mediaThread.getPlaylist().remove(songToRemove);
-			this.renderPlaylist();
+			this.removeSong(songToRemove);
 			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
 	}
 
+	private void removeSong(int songToRemove) {
+		this.playlist.remove(songToRemove);
+		this.titles.remove(songToRemove);
+		this.mediaThread.getPlaylist().remove(songToRemove);
+		this.renderPlaylist();
+	}
+
 	public void openCrankExplorer(View v) {
 		Intent openCrankExplorer = new Intent(this, CrankExplorer.class);
-		startActivityForResult(openCrankExplorer, REQUEST_CODE);
+		this.startActivityForResult(openCrankExplorer, REQUEST_CODE);
 	}
 
 	public void clearPlaylist(View v) {
@@ -224,7 +215,7 @@ public class CrankPlayerActivity extends CrankListActivity {
 	private void renderPlaylist() {
 		ArrayAdapter<String> fileList = new ArrayAdapter<String>(this,
 				R.layout.file_row, this.titles);
-		setListAdapter(fileList);
+		this.setListAdapter(fileList);
 	}
 
 	private void updateStatus() {
@@ -259,20 +250,8 @@ public class CrankPlayerActivity extends CrankListActivity {
 				this.playlist.get(this.song).getName());
 		builder.setMessage(errorMessage);
 		builder.setCancelable(true);
-		builder.setPositiveButton(R.string.yes, new OnClickListener() {
-			public void onClick(DialogInterface dialog, int button) {
-				playlist.remove(song);
-				mediaThread.getPlaylist().remove(song);
-				status = MediaStatus.STOPPED;
-				renderCurrentSongInfo();
-				renderPlaylist();
-			}
-		});
-		builder.setNegativeButton(R.string.no, new OnClickListener() {
-			public void onClick(DialogInterface dialog, int button) {
-				dialog.cancel();
-			}
-		});
+		builder.setPositiveButton(R.string.yes, this.errorDialogClickListener);
+		builder.setNegativeButton(R.string.no, this.errorDialogClickListener);
 		AlertDialog errorDialog = builder.create();
 		errorDialog.show();
 	}
@@ -296,6 +275,40 @@ public class CrankPlayerActivity extends CrankListActivity {
 				this.mediaThread.getPlaylist().addAll(selectedFiles);
 			}
 			this.renderPlaylist();
+		}
+	}
+
+	private final class MediaServiceConnection implements ServiceConnection {
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			if (mediaServiceBinder == null || mediaThread == null) {
+				mediaServiceBinder = (MediaServiceBinder) service;
+				mediaThread = mediaServiceBinder.getMediaService()
+						.getMediaThread();
+				status = mediaThread.getStatus();
+			}
+		}
+
+		public void onServiceDisconnected(ComponentName className) {
+			mediaServiceBinder = null;
+			mediaThread = null;
+		}
+	}
+
+	private final class ErrorDialogClickListener implements OnClickListener {
+		public void onClick(DialogInterface dialog, int button) {
+			switch (button) {
+			case -1:
+				// -1 stands for "remove song" or positive button
+				removeSong(song);
+				status = MediaStatus.STOPPED;
+				renderCurrentSongInfo();
+				break;
+			case -2:
+				// -2 stands for "dismiss" or negative button
+				dialog.cancel();
+				break;
+			}
+
 		}
 	}
 }

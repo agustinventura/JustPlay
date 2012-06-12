@@ -4,22 +4,31 @@ import android.util.Log;
 
 public class CrankLog {
 
-	private static String appName = "CrankPlayer";
-	
+	private static final String appName = "CrankPlayer";
+	public static final boolean production = true;
+
 	public static void v(Object source, String message) {
-		Log.v(appName, source.getClass().getSimpleName() + " - " + message);
+		if (!production) {
+			Log.v(appName, source.getClass().getSimpleName() + " - " + message);
+		}
 	}
 
 	public static void d(Object source, String message) {
-		Log.d(appName, source.getClass().getSimpleName() + " - " + message);
+		if (!production) {
+			Log.d(appName, source.getClass().getSimpleName() + " - " + message);
+		}
 	}
 
 	public static void i(Object source, String message) {
-		Log.i(appName, source.getClass().getSimpleName() + " - " + message);
+		if (!production) {
+			Log.i(appName, source.getClass().getSimpleName() + " - " + message);
+		}
 	}
 
 	public static void w(Object source, String message) {
-		Log.w(appName, source.getClass().getSimpleName() + " - " + message);
+		if (!production) {
+			Log.w(appName, source.getClass().getSimpleName() + " - " + message);
+		}
 	}
 
 	public static void e(Object source, String message) {
