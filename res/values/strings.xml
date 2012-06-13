@@ -39,7 +39,4 @@
 	<string name="add_file">Do you want to add the selected song to the playlist?</string>
 	<string name="directory_contextual_title">Directory selected</string>
 	<string name="add_directory">Add all songs</string>
-	
-	<!-- mediaservice texts -->
-	<string name=""></string>
 </resources>
