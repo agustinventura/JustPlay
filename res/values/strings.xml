@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+	<!-- application wide texts -->
     <string name="app_name">CrankPlayer</string>
 	<string name="explorer_name">CrankExplorer</string>
 	<string name="yes">Yes</string>
 	<string name="no">No</string>
+	<string name="started">CrankPlayer Started</string>
+	<string name="crankplayer_playing">CrankPlayer playing</string>
+	<string name="crankplayer_stopped">CrankPlayer stopped</string>
+	<string name="crankplayer_paused">CrankPlayer paused</string>
+	<string name="crankplayer_error">CrankPlayer error</string>
+	<string name="playing">Playing</string>
+	<string name="stopped">Stopped</string>
+	<string name="paused">Paused</string>
+	<string name="error">Error</string>	
 	
+	<!-- crankplayer texts -->
 	<string name="crankplayer_welcome">Welcome to CrankPlayer, the lightweight Android media player</string>
 	<string name="open_explorer">Open File Explorer</string>
 	<string name="playlist_title">Playlist:</string>
@@ -22,10 +32,14 @@
 	<string name="play_error">Error playing ##songName##, do you wish to remove it from the playlist?</string>
 	<string name="remove_song">Remove song from playlist</string>
 	
+	<!-- crankexplorer texts -->
 	<string name="crankexplorer_welcome">Welcome to CrankExplorer, please choose a file.</string>
 	<string name="directory">Directory: </string>
 	<string name="empty_directory">Current directory is empty</string>
 	<string name="add_file">Do you want to add the selected song to the playlist?</string>
 	<string name="directory_contextual_title">Directory selected</string>
 	<string name="add_directory">Add all songs</string>
+	
+	<!-- mediaservice texts -->
+	<string name=""></string>
 </resources>

@@ -31,7 +31,7 @@ import com.crankcode.threads.MediaThread;
 import com.crankcode.utils.ID3Reader;
 import com.crankcode.utils.MediaStatus;
 
-public class CrankPlayerActivity extends CrankListActivity {
+public class CrankPlayer extends CrankListActivity {
 
 	private final static int REQUEST_CODE = 101;
 	private final List<File> playlist = new ArrayList<File>();

@@ -8,16 +8,22 @@ import java.util.List;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 
+import com.crankcode.services.MediaService;
 import com.crankcode.utils.CrankLog;
 import com.crankcode.utils.MediaStatus;
 
 public class MediaThread extends Thread {
 
 	private MediaPlayer mediaPlayer;
-	private List<File> playlist = new ArrayList<File>();
+	private final List<File> playlist = new ArrayList<File>();
 	private int song = 0;
 	private MediaStatus status = MediaStatus.STOPPED;
 	private final int seekMiliseconds = 15000;
+	private final MediaService mediaService;
+
+	public MediaThread(MediaService mediaService) {
+		this.mediaService = mediaService;
+	}
 
 	@Override
 	public void run() {
@@ -72,6 +78,8 @@ public class MediaThread extends Thread {
 					});
 
 			this.status = MediaStatus.PLAYING;
+			this.mediaService.updateNotification(this.status,
+					this.playlist.get(songPosition));
 		} catch (IllegalArgumentException e) {
 			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
 			this.status = MediaStatus.ERROR;
@@ -92,12 +100,15 @@ public class MediaThread extends Thread {
 			this.song = 0;
 			this.status = MediaStatus.STOPPED;
 		}
+		this.mediaService.updateNotification(this.status, null);
 		return this.status;
 	}
 
 	public MediaStatus pause() {
 		this.status = MediaStatus.PAUSED;
 		this.mediaPlayer.pause();
+		this.mediaService.updateNotification(this.status,
+				this.playlist.get(this.song));
 		return this.status;
 	}
 
@@ -151,7 +162,7 @@ public class MediaThread extends Thread {
 		this.mediaPlayer.release();
 		// We make sure playlist and mediaPlayer are eligible for garbage
 		// collection
-		this.playlist = null;
+		this.playlist.clear();
 		this.mediaPlayer = null;
 	}
 
