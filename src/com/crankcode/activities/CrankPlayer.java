@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -227,6 +228,25 @@ public class CrankPlayer extends CrankListActivity {
 			this.status = MediaStatus.STOPPED;
 		}
 		this.renderCurrentSongInfo();
+		if (this.status.equals(MediaStatus.PLAYING)) {
+			this.renderPauseButton();
+		} else if (this.status.equals(MediaStatus.STOPPED)) {
+			this.renderPlayButton();
+		}
+	}
+
+	private void renderPauseButton() {
+		Button pauseButton = (Button) findViewById(R.id.pause);
+		pauseButton.setVisibility(View.VISIBLE);
+		Button playButton = (Button) findViewById(R.id.play);
+		playButton.setVisibility(View.GONE);
+	}
+
+	private void renderPlayButton() {
+		Button pauseButton = (Button) findViewById(R.id.pause);
+		pauseButton.setVisibility(View.GONE);
+		Button playButton = (Button) findViewById(R.id.play);
+		playButton.setVisibility(View.VISIBLE);
 	}
 
 	private void renderCurrentSongInfo() {

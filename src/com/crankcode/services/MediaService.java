@@ -32,14 +32,13 @@ public class MediaService extends CrankService {
 			this.mediaThread.start();
 		}
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		this.createNotification();
 	}
 
 	@Override
 	public void onDestroy() {
 		this.mediaThread.end();
 		this.mediaThread.interrupt();
-		this.nm.cancel(NOTIFY_ID);
+		this.clearNotifications();
 		super.onDestroy();
 	}
 
@@ -69,27 +68,6 @@ public class MediaService extends CrankService {
 		return this.mediaThread;
 	}
 
-	public void createNotification() {
-		// Create the notification
-		// TODO: display crankplayer icon
-		Notification notification = new Notification(R.drawable.playbackstart,
-				this.getText(R.string.started), System.currentTimeMillis());
-
-		Context context = getApplicationContext();
-		// Create the intent that will be fired when user clicks on the
-		// notification
-		Intent notificationIntent = new Intent(this, CrankPlayer.class);
-		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		// The PendingIntent represents the firing of above intent
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-				notificationIntent, 0);
-		// Notification general information
-		notification.setLatestEventInfo(context,
-				this.getText(R.string.started), "", contentIntent);
-		// Display
-		nm.notify(NOTIFY_ID, notification);
-	}
-
 	public void updateNotification(MediaStatus status, File song) {
 		Notification notification = null;
 		Context context = getApplicationContext();
@@ -97,10 +75,9 @@ public class MediaService extends CrankService {
 		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				notificationIntent, 0);
-		// TODO: ICONS!!!
 		switch (status) {
 		case PLAYING:
-			notification = new Notification(R.drawable.playbackstart,
+			notification = new Notification(R.drawable.ic_stat_notify_play,
 					this.getText(R.string.crankplayer_playing),
 					System.currentTimeMillis());
 			notification.setLatestEventInfo(context,
@@ -108,14 +85,14 @@ public class MediaService extends CrankService {
 					contentIntent);
 			break;
 		case STOPPED:
-			notification = new Notification(R.drawable.playbackpause,
+			notification = new Notification(R.drawable.ic_stat_notify_stop,
 					this.getText(R.string.crankplayer_stopped),
 					System.currentTimeMillis());
 			notification.setLatestEventInfo(context,
 					this.getText(R.string.stopped), "", contentIntent);
 			break;
 		case PAUSED:
-			notification = new Notification(R.drawable.playbackpause,
+			notification = new Notification(R.drawable.ic_stat_notify_pause,
 					this.getText(R.string.crankplayer_paused),
 					System.currentTimeMillis());
 			notification.setLatestEventInfo(context,
@@ -123,7 +100,7 @@ public class MediaService extends CrankService {
 					contentIntent);
 			break;
 		case ERROR:
-			notification = new Notification(R.drawable.playbackpause,
+			notification = new Notification(R.drawable.ic_stat_notify_error,
 					this.getText(R.string.crankplayer_error),
 					System.currentTimeMillis());
 			notification.setLatestEventInfo(context,
@@ -131,5 +108,9 @@ public class MediaService extends CrankService {
 			break;
 		}
 		nm.notify(NOTIFY_ID, notification);
+	}
+
+	public void clearNotifications() {
+		this.nm.cancel(NOTIFY_ID);
 	}
 }
