@@ -1,6 +1,13 @@
 package com.crankcode.activities;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +36,7 @@ import android.widget.TextView;
 import com.crankcode.services.MediaService;
 import com.crankcode.services.binders.MediaServiceBinder;
 import com.crankcode.threads.MediaThread;
+import com.crankcode.utils.CrankLog;
 import com.crankcode.utils.ID3Reader;
 import com.crankcode.utils.MediaStatus;
 
@@ -53,9 +61,7 @@ public class CrankPlayer extends CrankListActivity {
 		Intent intent = new Intent(getBaseContext(), MediaService.class);
 		this.startService(intent);
 		this.registerForContextMenu(getListView());
-		if (savedInstanceState != null) {
-			this.restoreState(savedInstanceState);
-		}
+		this.restoreState(savedInstanceState);
 	}
 
 	@Override
@@ -90,6 +96,7 @@ public class CrankPlayer extends CrankListActivity {
 			Intent intent = new Intent(getBaseContext(), MediaService.class);
 			this.stopService(intent);
 		}
+		this.saveStateToFile();
 		super.onDestroy();
 	}
 
@@ -102,24 +109,68 @@ public class CrankPlayer extends CrankListActivity {
 		super.onSaveInstanceState(outState);
 	}
 
-	private void restoreState(Bundle savedInstanceState) {
-		if (savedInstanceState.containsKey("playlist")) {
-			List<File> savedPlaylist = (List<File>) savedInstanceState
-					.get("playlist");
-			List<String> savedTitles = (List<String>) savedInstanceState
-					.get("titles");
-			int savedSong = savedInstanceState.getInt("song");
-			MediaStatus savedStatus = (MediaStatus) savedInstanceState
-					.get("status");
-			if (!savedPlaylist.isEmpty()) {
-				this.playlist.addAll(savedPlaylist);
-				this.titles.addAll(savedTitles);
-				this.song = savedSong;
-				this.status = savedStatus;
-				this.renderCurrentSongInfo();
-				this.renderPlaylist();
+	private void saveStateToFile() {
+		try {
+			FileOutputStream fos = this.openFileOutput(
+					"crankplayer_playlist.cpl", MODE_PRIVATE);
+			PrintWriter pw = new PrintWriter(fos);
+			for (File song : this.playlist) {
+				pw.println(song.getPath());
 			}
+			pw.close();
+			fos.close();
+		} catch (IOException e) {
+			CrankLog.e(
+					this,
+					"Not able to write playlist to a file: "
+							+ e.getLocalizedMessage());
 		}
+	}
+
+	private void restoreState(Bundle savedInstanceState) {
+		if (savedInstanceState != null) {
+			if (savedInstanceState.containsKey("playlist")) {
+				List<File> savedPlaylist = (List<File>) savedInstanceState
+						.get("playlist");
+				List<String> savedTitles = (List<String>) savedInstanceState
+						.get("titles");
+				int savedSong = savedInstanceState.getInt("song");
+				MediaStatus savedStatus = (MediaStatus) savedInstanceState
+						.get("status");
+				if (!savedPlaylist.isEmpty()) {
+					this.playlist.addAll(savedPlaylist);
+					this.titles.addAll(savedTitles);
+					this.song = savedSong;
+					this.status = savedStatus;
+					this.updateStatus();
+					this.renderCurrentSongInfo();
+					this.renderPlaylist();
+				}
+			}
+		} else {
+			this.readStateFromFile();
+		}
+	}
+
+	private void readStateFromFile() {
+		try {
+			FileInputStream fis = this
+					.openFileInput("crankplayer_playlist.cpl");
+			InputStreamReader inputStreamReader = new InputStreamReader(fis);
+			BufferedReader br = new BufferedReader(inputStreamReader);
+			String path = null;
+			while ((path = br.readLine()) != null) {
+				this.playlist.add(new File(path));
+			}
+		} catch (FileNotFoundException e) {
+			CrankLog.w(this, "Playlist recovery from unexistent file failed");
+		} catch (IOException e) {
+			CrankLog.e(
+					this,
+					"Not able to read playlist from file: "
+							+ e.getLocalizedMessage());
+		}
+
 	}
 
 	@Override

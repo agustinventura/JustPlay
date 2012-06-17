@@ -47,6 +47,10 @@ public class MediaThread extends Thread {
 		return this.song;
 	}
 
+	public void setSong(int song) {
+		this.song = song;
+	}
+
 	public MediaStatus getStatus() {
 		return this.status;
 	}
@@ -165,5 +169,4 @@ public class MediaThread extends Thread {
 		this.playlist.clear();
 		this.mediaPlayer = null;
 	}
-
 }

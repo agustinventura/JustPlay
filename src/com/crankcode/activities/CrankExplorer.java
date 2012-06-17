@@ -11,6 +11,8 @@ import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -43,9 +45,7 @@ public class CrankExplorer extends CrankListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (savedInstanceState != null) {
-			this.restoreState(savedInstanceState);
-		}
+		this.restoreState(savedInstanceState);
 		setContentView(R.layout.crankexplorer);
 		myPath = (TextView) findViewById(R.id.path);
 		if (position == null) {
@@ -65,12 +65,21 @@ public class CrankExplorer extends CrankListActivity {
 	}
 
 	private void restoreState(Bundle savedInstanceState) {
-		if (savedInstanceState.containsKey("item")) {
-			this.item.addAll((List<String>) savedInstanceState
-					.getSerializable("item"));
-			this.path.addAll((List<String>) savedInstanceState
-					.getSerializable("path"));
-			this.position = (File) savedInstanceState.get("position");
+		if (savedInstanceState != null) {
+			if (savedInstanceState.containsKey("item")) {
+				this.item.addAll((List<String>) savedInstanceState
+						.getSerializable("item"));
+				this.path.addAll((List<String>) savedInstanceState
+						.getSerializable("path"));
+				this.position = (File) savedInstanceState.get("position");
+			}
+		} else {
+			SharedPreferences prefs = this.getSharedPreferences(
+					"com.crankcode.CrankExplorer", MODE_PRIVATE);
+			if (prefs.contains("crankExplorerDirectory")) {
+				this.position = new File(prefs.getString(
+						"crankExplorerDirectory", ""));
+			}
 		}
 	}
 
@@ -168,6 +177,7 @@ public class CrankExplorer extends CrankListActivity {
 	@Override
 	public void finish() {
 		Intent data = new Intent();
+		this.saveCurrentDirectory();
 		if (this.selected != null) {
 			if (this.selected.isFile()) {
 				data.putExtra("selectedFile", this.selected);
@@ -179,6 +189,20 @@ public class CrankExplorer extends CrankListActivity {
 		}
 		setResult(RESULT_OK, data);
 		super.finish();
+	}
+
+	private void saveCurrentDirectory() {
+		if (this.selected != null) {
+			SharedPreferences prefs = this.getSharedPreferences(
+					"com.crankcode.CrankExplorer", MODE_PRIVATE);
+			Editor editor = prefs.edit();
+			if (prefs.contains("crankExplorerDirectory")) {
+				editor.remove("crankExplorerDirectory");
+			}
+			editor.putString("crankExplorerDirectory",
+					this.selected.getParent());
+			editor.commit();
+		}
 	}
 
 	private List<File> explodeDir(File directory) {
