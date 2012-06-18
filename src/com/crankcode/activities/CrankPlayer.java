@@ -142,14 +142,14 @@ public class CrankPlayer extends CrankListActivity {
 					this.titles.addAll(savedTitles);
 					this.song = savedSong;
 					this.status = savedStatus;
-					this.updateStatus();
-					this.renderCurrentSongInfo();
-					this.renderPlaylist();
 				}
 			}
 		} else {
 			this.readStateFromFile();
 		}
+		this.updateStatus();
+		this.renderCurrentSongInfo();
+		this.renderPlaylist();
 	}
 
 	private void readStateFromFile() {
@@ -160,8 +160,15 @@ public class CrankPlayer extends CrankListActivity {
 			BufferedReader br = new BufferedReader(inputStreamReader);
 			String path = null;
 			while ((path = br.readLine()) != null) {
-				this.playlist.add(new File(path));
+				File song = new File(path);
+				this.playlist.add(song);
+				this.titles.add(this.id3Reader.procesar(song));
 			}
+			br.close();
+			inputStreamReader.close();
+			fis.close();
+			File deletePlaylist = new File("crankplayer_playlist.cpl");
+			deletePlaylist.delete();
 		} catch (FileNotFoundException e) {
 			CrankLog.w(this, "Playlist recovery from unexistent file failed");
 		} catch (IOException e) {
