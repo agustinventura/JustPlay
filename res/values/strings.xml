@@ -18,7 +18,7 @@
 	<!-- crankplayer texts -->
 	<string name="crankplayer_welcome">Welcome to CrankPlayer, the lightweight Android media player</string>
 	<string name="open_explorer">Add songs</string>
-	<string name="playlist_title">Playlist:</string>
+	<string name="playlist_title">Current Playlist</string>
 	<string name="now_playing">Now playing: </string>
 	<string name="clear_playlist">Clear Playlist</string>
 	<string name="empty_playlist">Playlist is empty</string>

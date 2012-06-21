@@ -28,11 +28,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.crankcode.adapters.SongAdapter;
 import com.crankcode.services.MediaService;
 import com.crankcode.services.binders.MediaServiceBinder;
 import com.crankcode.threads.MediaThread;
@@ -44,7 +45,6 @@ public class CrankPlayer extends CrankListActivity {
 
 	private final static int REQUEST_CODE = 101;
 	private final List<File> playlist = new ArrayList<File>();
-	private final List<String> titles = new ArrayList<String>();
 	private final ID3Reader id3Reader = new ID3Reader();
 	private MediaServiceBinder mediaServiceBinder = null;
 	private MediaThread mediaThread = null;
@@ -103,7 +103,6 @@ public class CrankPlayer extends CrankListActivity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putSerializable("playlist", (Serializable) this.playlist);
-		outState.putSerializable("titles", (Serializable) this.titles);
 		outState.putInt("song", this.song);
 		outState.putSerializable("status", this.status);
 		super.onSaveInstanceState(outState);
@@ -132,14 +131,11 @@ public class CrankPlayer extends CrankListActivity {
 			if (savedInstanceState.containsKey("playlist")) {
 				List<File> savedPlaylist = (List<File>) savedInstanceState
 						.get("playlist");
-				List<String> savedTitles = (List<String>) savedInstanceState
-						.get("titles");
 				int savedSong = savedInstanceState.getInt("song");
 				MediaStatus savedStatus = (MediaStatus) savedInstanceState
 						.get("status");
 				if (!savedPlaylist.isEmpty()) {
 					this.playlist.addAll(savedPlaylist);
-					this.titles.addAll(savedTitles);
 					this.song = savedSong;
 					this.status = savedStatus;
 				}
@@ -147,8 +143,6 @@ public class CrankPlayer extends CrankListActivity {
 		} else {
 			this.readStateFromFile();
 		}
-		this.updateStatus();
-		this.renderCurrentSongInfo();
 		this.renderPlaylist();
 	}
 
@@ -162,7 +156,6 @@ public class CrankPlayer extends CrankListActivity {
 			while ((path = br.readLine()) != null) {
 				File song = new File(path);
 				this.playlist.add(song);
-				this.titles.add(this.id3Reader.procesar(song));
 			}
 			br.close();
 			inputStreamReader.close();
@@ -177,7 +170,6 @@ public class CrankPlayer extends CrankListActivity {
 					"Not able to read playlist from file: "
 							+ e.getLocalizedMessage());
 		}
-
 	}
 
 	@Override
@@ -214,7 +206,6 @@ public class CrankPlayer extends CrankListActivity {
 
 	private void removeSong(int songToRemove) {
 		this.playlist.remove(songToRemove);
-		this.titles.remove(songToRemove);
 		this.mediaThread.getPlaylist().remove(songToRemove);
 		this.renderPlaylist();
 	}
@@ -226,7 +217,6 @@ public class CrankPlayer extends CrankListActivity {
 
 	public void clearPlaylist(View v) {
 		this.playlist.clear();
-		this.titles.clear();
 		this.mediaThread.clearPlaylist();
 		this.song = 0;
 		this.renderPlaylist();
@@ -272,8 +262,8 @@ public class CrankPlayer extends CrankListActivity {
 	}
 
 	private void renderPlaylist() {
-		ArrayAdapter<String> fileList = new ArrayAdapter<String>(this,
-				R.layout.file_row, this.titles);
+		SongAdapter fileList = new SongAdapter(this.getBaseContext(),
+				this.playlist, this.id3Reader);
 		this.setListAdapter(fileList);
 	}
 
@@ -294,29 +284,46 @@ public class CrankPlayer extends CrankListActivity {
 	}
 
 	private void renderPauseButton() {
-		Button pauseButton = (Button) findViewById(R.id.pause);
+		ImageButton pauseButton = (ImageButton) findViewById(R.id.pause);
 		pauseButton.setVisibility(View.VISIBLE);
-		Button playButton = (Button) findViewById(R.id.play);
+		ImageButton playButton = (ImageButton) findViewById(R.id.play);
 		playButton.setVisibility(View.GONE);
 	}
 
 	private void renderPlayButton() {
-		Button pauseButton = (Button) findViewById(R.id.pause);
+		ImageButton pauseButton = (ImageButton) findViewById(R.id.pause);
 		pauseButton.setVisibility(View.GONE);
-		Button playButton = (Button) findViewById(R.id.play);
+		ImageButton playButton = (ImageButton) findViewById(R.id.play);
 		playButton.setVisibility(View.VISIBLE);
+	}
+
+	private void renderQuotes(boolean show) {
+		ImageView leftQuote = (ImageView) findViewById(R.id.leftQuote);
+		ImageView rightQuote = (ImageView) findViewById(R.id.rightQuote);
+		if (show) {
+			leftQuote.setVisibility(View.VISIBLE);
+			rightQuote.setVisibility(View.VISIBLE);
+		} else {
+			leftQuote.setVisibility(View.GONE);
+			rightQuote.setVisibility(View.GONE);
+		}
 	}
 
 	private void renderCurrentSongInfo() {
 		TextView currentSongView = (TextView) findViewById(R.id.current_song_info);
 		if (this.status.equals(MediaStatus.PLAYING)) {
-			currentSongView.setText(this.titles.get(this.song));
+			this.renderQuotes(true);
+			currentSongView.setText(this.id3Reader.procesar(this.playlist
+					.get(this.song)));
 		} else if (this.status.equals(MediaStatus.PAUSED)) {
-			currentSongView.setText(getText(R.string.pause) + " - "
-					+ this.titles.get(this.song));
+			this.renderQuotes(true);
+			currentSongView.setText(getText(R.string.paused) + " - "
+					+ this.id3Reader.procesar(this.playlist.get(this.song)));
 		} else if (this.status.equals(MediaStatus.STOPPED)) {
-			currentSongView.setText(R.string.stop);
+			this.renderQuotes(false);
+			currentSongView.setText(R.string.stopped);
 		} else if (this.status.equals(MediaStatus.ERROR)) {
+			this.renderQuotes(false);
 			this.showErrorDialog();
 		}
 	}
@@ -339,7 +346,6 @@ public class CrankPlayer extends CrankListActivity {
 		if (data.hasExtra("selectedFile")) {
 			File selectedFile = (File) data.getExtras().get("selectedFile");
 			this.playlist.add(selectedFile);
-			this.titles.add(this.id3Reader.procesar(selectedFile));
 			this.renderPlaylist();
 			if (this.mediaServiceBinder != null) {
 				this.mediaThread.getPlaylist().add(selectedFile);
@@ -348,7 +354,6 @@ public class CrankPlayer extends CrankListActivity {
 			List<File> selectedFiles = (List<File>) data.getExtras().get(
 					"selectedFiles");
 			this.playlist.addAll(selectedFiles);
-			this.titles.addAll(id3Reader.procesar(selectedFiles));
 			if (this.mediaServiceBinder != null) {
 				this.mediaThread.getPlaylist().addAll(selectedFiles);
 			}
@@ -363,6 +368,11 @@ public class CrankPlayer extends CrankListActivity {
 				mediaThread = mediaServiceBinder.getMediaService()
 						.getMediaThread();
 				status = mediaThread.getStatus();
+				if (mediaThread.getPlaylist().isEmpty() && !playlist.isEmpty()) {
+					mediaThread.getPlaylist().addAll(playlist);
+				}
+				updateStatus();
+				renderCurrentSongInfo();
 			}
 		}
 

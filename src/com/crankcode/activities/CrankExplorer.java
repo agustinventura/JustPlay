@@ -19,6 +19,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -124,10 +125,15 @@ public class CrankExplorer extends CrankListActivity {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		menu.setHeaderTitle(R.string.directory_contextual_title);
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.crankexplorer_context, menu);
+		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+		int selectedPosition = (int) info.id;
+		File selectedFile = new File(this.path.get(selectedPosition));
+		if (selectedFile.isDirectory()) {
+			super.onCreateContextMenu(menu, v, menuInfo);
+			menu.setHeaderTitle(R.string.directory_contextual_title);
+			MenuInflater inflater = getMenuInflater();
+			inflater.inflate(R.menu.crankexplorer_context, menu);
+		}
 	}
 
 	@Override
