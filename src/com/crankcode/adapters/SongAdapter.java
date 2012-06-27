@@ -38,32 +38,22 @@ public class SongAdapter extends BaseAdapter {
 	}
 
 	public View getView(int position, View convertView, ViewGroup parentView) {
-		TextView text = null;
-		LayoutInflater inflater = null;
-		File song = null;
-		if (convertView == null) {
-			inflater = (LayoutInflater) context
+		View rowView = convertView;
+		if (rowView == null) {
+			LayoutInflater inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = inflater
-					.inflate(R.layout.file_row, parentView, false);
-			text = (TextView) convertView.findViewById(R.id.fileRow);
-			song = this.songs.get(position);
+			rowView = inflater.inflate(R.layout.file_row, null);
 			ViewHolder viewHolder = new ViewHolder();
-			viewHolder.text = text;
-			convertView.setTag(viewHolder);
-		} else {
-			ViewHolder viewHolder = (ViewHolder) convertView.getTag();
-			text = viewHolder.text;
+			viewHolder.text = (TextView) rowView.findViewById(R.id.fileRow);
+			rowView.setTag(viewHolder);
 		}
-
-		if (song != null) {
-			text.setText(this.id3Reader.procesar(song));
-		}
-		return convertView;
+		ViewHolder holder = (ViewHolder) rowView.getTag();
+		File song = this.songs.get(position);
+		holder.text.setText(this.id3Reader.procesar(song));
+		return rowView;
 	}
 
 	private class ViewHolder {
 		TextView text;
 	}
-
 }

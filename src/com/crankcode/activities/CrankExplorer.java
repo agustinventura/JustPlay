@@ -214,6 +214,7 @@ public class CrankExplorer extends CrankListActivity {
 	private List<File> explodeDir(File directory) {
 		List<File> filesInDirectory = new ArrayList<File>();
 		File[] files = directory.listFiles(mediaFileFilter);
+		Arrays.sort(files);
 		for (File file : files) {
 			if (file.isFile()) {
 				filesInDirectory.add(file);

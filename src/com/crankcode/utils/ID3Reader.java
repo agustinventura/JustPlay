@@ -23,8 +23,13 @@ public class ID3Reader {
 			String id3 = new String(tagBytes);
 			String tag = id3.substring(0, 3);
 			if (tag.equals("TAG")) {
-				artistAndTitle.append(id3.substring(33, 62).trim())
-						.append(" - ").append(id3.substring(3, 32).trim());
+				String artist = id3.substring(33, 62).trim();
+				String title = id3.substring(3, 32).trim();
+				if (!"".equals(artist) && !"".equals(title)) {
+					artistAndTitle.append(artist).append(" - ").append(title);
+				} else {
+					artistAndTitle.append(mp3File.getName());
+				}
 			} else {
 				artistAndTitle.append(mp3File.getName());
 			}
