@@ -100,8 +100,10 @@
 	        android:layout_alignParentBottom="true"
 	        android:padding="8sp">
 	    
-	    <Button
+	    <ImageButton
 	        android:id="@+id/rewind"
+	        android:src="@drawable/ic_rwd"
+	        android:background="@null"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="@string/rewind"
@@ -159,8 +161,10 @@
 	        android:onClick="nextSong" 
 	        android:layout_weight="2"/>
 	    
-	    <Button
+	    <ImageButton
 	        android:id="@+id/fastforward"
+	        android:src="@drawable/ic_ffw"
+	        android:background="@null"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="@string/fastforward"
