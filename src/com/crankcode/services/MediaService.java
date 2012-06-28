@@ -8,11 +8,14 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 
 import com.crankcode.activities.CrankPlayer;
 import com.crankcode.activities.R;
 import com.crankcode.services.binders.MediaServiceBinder;
 import com.crankcode.threads.MediaThread;
+import com.crankcode.utils.CallManager;
 import com.crankcode.utils.ID3Reader;
 import com.crankcode.utils.MediaStatus;
 
@@ -23,6 +26,7 @@ public class MediaService extends CrankService {
 	private NotificationManager nm;
 	private static final int NOTIFY_ID = R.layout.crankplayer;
 	private final ID3Reader id3Reader = new ID3Reader();
+	private CallManager callManager;
 
 	@Override
 	public void onCreate() {
@@ -32,6 +36,11 @@ public class MediaService extends CrankService {
 			this.mediaThread.start();
 		}
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+		if (mgr != null) {
+			this.callManager = new CallManager(this.mediaThread);
+			mgr.listen(this.callManager, PhoneStateListener.LISTEN_CALL_STATE);
+		}
 	}
 
 	@Override
@@ -39,6 +48,10 @@ public class MediaService extends CrankService {
 		this.mediaThread.end();
 		this.mediaThread.interrupt();
 		this.clearNotifications();
+		TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+		if (mgr != null) {
+			mgr.listen(this.callManager, PhoneStateListener.LISTEN_NONE);
+		}
 		super.onDestroy();
 	}
 
