@@ -73,7 +73,13 @@ public class MediaService extends CrankService {
 
 	@Override
 	public boolean onUnbind(Intent intent) {
-		// Nothing to do here
+		if (this.mediaThread.getStatus().equals(MediaStatus.STOPPED)
+				|| this.mediaThread.getStatus().equals(MediaStatus.ERROR)) {
+			TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+			if (mgr != null) {
+				mgr.listen(this.callManager, PhoneStateListener.LISTEN_NONE);
+			}
+		}
 		return super.onUnbind(intent);
 	}
 

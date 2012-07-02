@@ -56,7 +56,9 @@ public class MediaThread extends Thread {
 	}
 
 	public MediaStatus play() {
-		this.stopPlayback();
+		if (this.status.equals(MediaStatus.PLAYING)) {
+			this.stopPlayback();
+		}
 		if (!this.playlist.isEmpty()) {
 			this.play(this.song);
 		}

@@ -5,7 +5,7 @@ import android.util.Log;
 public class CrankLog {
 
 	private static final String appName = "CrankPlayer";
-	public static final boolean production = true;
+	public static final boolean production = false;
 
 	public static void v(Object source, String message) {
 		if (!production) {
