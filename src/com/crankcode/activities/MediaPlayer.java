@@ -41,7 +41,7 @@ import com.crankcode.utils.CrankLog;
 import com.crankcode.utils.ID3Reader;
 import com.crankcode.utils.MediaStatus;
 
-public class CrankPlayer extends CrankListActivity {
+public class MediaPlayer extends CrankListActivity {
 
 	private final static int REQUEST_CODE = 101;
 	private final List<File> playlist = new ArrayList<File>();
@@ -211,7 +211,7 @@ public class CrankPlayer extends CrankListActivity {
 	}
 
 	public void openCrankExplorer(View v) {
-		Intent openCrankExplorer = new Intent(this, CrankExplorer.class);
+		Intent openCrankExplorer = new Intent(this, FileExplorer.class);
 		this.startActivityForResult(openCrankExplorer, REQUEST_CODE);
 	}
 

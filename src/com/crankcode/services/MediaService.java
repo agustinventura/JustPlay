@@ -11,7 +11,7 @@ import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 
-import com.crankcode.activities.CrankPlayer;
+import com.crankcode.activities.MediaPlayer;
 import com.crankcode.activities.R;
 import com.crankcode.services.binders.MediaServiceBinder;
 import com.crankcode.threads.MediaThread;
@@ -36,6 +36,10 @@ public class MediaService extends CrankService {
 			this.mediaThread.start();
 		}
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		this.registerCallManager();
+	}
+
+	private void registerCallManager() {
 		TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 		if (mgr != null) {
 			this.callManager = new CallManager(this.mediaThread);
@@ -48,11 +52,18 @@ public class MediaService extends CrankService {
 		this.mediaThread.end();
 		this.mediaThread.interrupt();
 		this.clearNotifications();
-		TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-		if (mgr != null) {
-			mgr.listen(this.callManager, PhoneStateListener.LISTEN_NONE);
-		}
+		this.unregisterCallManager();
 		super.onDestroy();
+	}
+
+	private void unregisterCallManager() {
+		if (this.callManager != null) {
+			TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+			if (mgr != null) {
+				mgr.listen(this.callManager, PhoneStateListener.LISTEN_NONE);
+				this.callManager = null;
+			}
+		}
 	}
 
 	@Override
@@ -75,10 +86,7 @@ public class MediaService extends CrankService {
 	public boolean onUnbind(Intent intent) {
 		if (this.mediaThread.getStatus().equals(MediaStatus.STOPPED)
 				|| this.mediaThread.getStatus().equals(MediaStatus.ERROR)) {
-			TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-			if (mgr != null) {
-				mgr.listen(this.callManager, PhoneStateListener.LISTEN_NONE);
-			}
+			this.unregisterCallManager();
 		}
 		return super.onUnbind(intent);
 	}
@@ -90,7 +98,7 @@ public class MediaService extends CrankService {
 	public void updateNotification(MediaStatus status, File song) {
 		Notification notification = null;
 		Context context = getApplicationContext();
-		Intent notificationIntent = new Intent(this, CrankPlayer.class);
+		Intent notificationIntent = new Intent(this, MediaPlayer.class);
 		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				notificationIntent, 0);

@@ -27,7 +27,7 @@ import android.widget.TextView;
 
 import com.crankcode.utils.MediaFileFilter;
 
-public class CrankExplorer extends CrankListActivity {
+public class FileExplorer extends CrankListActivity {
 
 	private final List<String> item = new ArrayList<String>();
 

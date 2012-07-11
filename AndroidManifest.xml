@@ -6,12 +6,14 @@
 
     <uses-sdk android:minSdkVersion="7" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 	
     <application
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name" >
+        android:label="@string/app_name"
+        android:name="com.crankcode.application.CrankPlayer" >
         <activity
-            android:name=".CrankPlayer"
+            android:name=".MediaPlayer"
             android:label="@string/app_name" 
             android:theme="@android:style/Theme.Light">
             <intent-filter>
@@ -21,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity 
-            android:name=".CrankExplorer" 
+            android:name=".FileExplorer" 
             android:label="@string/explorer_name"
             android:theme="@android:style/Theme.Light"/>
             
