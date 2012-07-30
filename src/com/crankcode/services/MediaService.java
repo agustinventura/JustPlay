@@ -110,6 +110,7 @@ public class MediaService extends CrankService {
 			notification.setLatestEventInfo(context,
 					this.getText(R.string.playing), id3Reader.procesar(song),
 					contentIntent);
+			this.startForeground(NOTIFY_ID, notification);
 			break;
 		case STOPPED:
 			notification = new Notification(R.drawable.ic_stat_notify_stop,
@@ -117,6 +118,7 @@ public class MediaService extends CrankService {
 					System.currentTimeMillis());
 			notification.setLatestEventInfo(context,
 					this.getText(R.string.stopped), "", contentIntent);
+			this.stopForeground(true);
 			break;
 		case PAUSED:
 			notification = new Notification(R.drawable.ic_stat_notify_pause,
@@ -125,6 +127,7 @@ public class MediaService extends CrankService {
 			notification.setLatestEventInfo(context,
 					this.getText(R.string.paused), id3Reader.procesar(song),
 					contentIntent);
+			this.stopForeground(true);
 			break;
 		case ERROR:
 			notification = new Notification(R.drawable.ic_stat_notify_error,
@@ -132,6 +135,7 @@ public class MediaService extends CrankService {
 					System.currentTimeMillis());
 			notification.setLatestEventInfo(context,
 					this.getText(R.string.error), "", contentIntent);
+			this.stopForeground(true);
 			break;
 		}
 		nm.notify(NOTIFY_ID, notification);

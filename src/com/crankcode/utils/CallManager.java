@@ -16,9 +16,13 @@ public class CallManager extends PhoneStateListener {
 	@Override
 	public void onCallStateChanged(int state, String incomingNumber) {
 		if (state == TelephonyManager.CALL_STATE_RINGING) {
-			this.mediaThread.pause();
+			if (this.mediaThread.getStatus() == MediaStatus.PLAYING) {
+				this.mediaThread.pause();
+			}
 		} else if (state == TelephonyManager.CALL_STATE_IDLE) {
-			this.mediaThread.play();
+			if (this.mediaThread.getStatus() == MediaStatus.PAUSED) {
+				this.mediaThread.play();
+			}
 		}
 		super.onCallStateChanged(state, incomingNumber);
 	}
