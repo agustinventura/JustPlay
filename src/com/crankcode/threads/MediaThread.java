@@ -165,10 +165,12 @@ public class MediaThread extends Thread {
 	public void end() {
 		this.stopPlayback();
 		this.playlist.clear();
-		this.mediaPlayer.release();
+		if (this.mediaPlayer != null) {
+			this.mediaPlayer.release();
+			this.mediaPlayer = null;
+		}
 		// We make sure playlist and mediaPlayer are eligible for garbage
 		// collection
 		this.playlist.clear();
-		this.mediaPlayer = null;
 	}
 }
