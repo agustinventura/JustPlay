@@ -2,7 +2,7 @@ package com.crankcode.utils;
 
 import android.util.Log;
 
-public class CrankLog {
+public class Logger {
 
 	private static final String appName = "CrankPlayer";
 	public static final boolean production = false;

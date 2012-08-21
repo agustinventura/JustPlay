@@ -14,6 +14,7 @@ import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.ListActivity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -37,11 +38,11 @@ import com.crankcode.adapters.SongAdapter;
 import com.crankcode.services.MediaService;
 import com.crankcode.services.binders.MediaServiceBinder;
 import com.crankcode.threads.MediaThread;
-import com.crankcode.utils.CrankLog;
+import com.crankcode.utils.Logger;
 import com.crankcode.utils.ID3Reader;
 import com.crankcode.utils.MediaStatus;
 
-public class MediaPlayer extends CrankListActivity {
+public class MediaPlayer extends ListActivity {
 
 	private final static int REQUEST_CODE = 101;
 	private final List<File> playlist = new ArrayList<File>();
@@ -119,7 +120,7 @@ public class MediaPlayer extends CrankListActivity {
 			pw.close();
 			fos.close();
 		} catch (IOException e) {
-			CrankLog.e(
+			Logger.e(
 					this,
 					"Not able to write playlist to a file: "
 							+ e.getLocalizedMessage());
@@ -163,9 +164,9 @@ public class MediaPlayer extends CrankListActivity {
 			File deletePlaylist = new File("crankplayer_playlist.cpl");
 			deletePlaylist.delete();
 		} catch (FileNotFoundException e) {
-			CrankLog.w(this, "Playlist recovery from unexistent file failed");
+			Logger.w(this, "Playlist recovery from unexistent file failed");
 		} catch (IOException e) {
-			CrankLog.e(
+			Logger.e(
 					this,
 					"Not able to read playlist from file: "
 							+ e.getLocalizedMessage());
@@ -235,8 +236,10 @@ public class MediaPlayer extends CrankListActivity {
 	public void pause(View v) {
 		if (this.status.equals(MediaStatus.PLAYING)) {
 			this.mediaThread.pause();
+			this.renderPlayButton();
 		} else {
 			this.mediaThread.play(this.song);
+			this.renderPauseButton();
 		}
 		this.updateStatus();
 	}

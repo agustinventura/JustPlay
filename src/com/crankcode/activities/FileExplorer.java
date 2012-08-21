@@ -8,6 +8,7 @@ import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -27,7 +28,7 @@ import android.widget.TextView;
 
 import com.crankcode.utils.MediaFileFilter;
 
-public class FileExplorer extends CrankListActivity {
+public class FileExplorer extends ListActivity {
 
 	private final List<String> item = new ArrayList<String>();
 

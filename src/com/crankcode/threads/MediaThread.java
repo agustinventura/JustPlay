@@ -9,7 +9,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 
 import com.crankcode.services.MediaService;
-import com.crankcode.utils.CrankLog;
+import com.crankcode.utils.Logger;
 import com.crankcode.utils.MediaStatus;
 
 public class MediaThread extends Thread {
@@ -27,7 +27,7 @@ public class MediaThread extends Thread {
 
 	@Override
 	public void run() {
-		CrankLog.v(this, "run()");
+		Logger.v(this, "run()");
 		this.setMediaPlayer(new MediaPlayer());
 	}
 
@@ -87,13 +87,13 @@ public class MediaThread extends Thread {
 			this.mediaService.updateNotification(this.status,
 					this.playlist.get(songPosition));
 		} catch (IllegalArgumentException e) {
-			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
+			Logger.e(this, "Error on play(): " + e.getLocalizedMessage());
 			this.status = MediaStatus.ERROR;
 		} catch (IllegalStateException e) {
-			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
+			Logger.e(this, "Error on play(): " + e.getLocalizedMessage());
 			this.status = MediaStatus.ERROR;
 		} catch (IOException e) {
-			CrankLog.e(this, "Error on play(): " + e.getLocalizedMessage());
+			Logger.e(this, "Error on play(): " + e.getLocalizedMessage());
 			this.status = MediaStatus.ERROR;
 		}
 		return this.status;

@@ -35,7 +35,7 @@ public class ID3Reader {
 			}
 			in.close();
 		} catch (IOException e) {
-			CrankLog.e(this, "procesar() - " + e.getLocalizedMessage());
+			Logger.e(this, "procesar() - " + e.getLocalizedMessage());
 			artistAndTitle.append(mp3File.getName());
 		}
 		return artistAndTitle.toString();
