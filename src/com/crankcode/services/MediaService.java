@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -19,6 +20,7 @@ import com.crankcode.threads.MediaThread;
 import com.crankcode.utils.CallManager;
 import com.crankcode.utils.ID3Reader;
 import com.crankcode.utils.MediaStatus;
+import com.crankcode.utils.SDCardManager;
 
 public class MediaService extends Service {
 
@@ -28,6 +30,7 @@ public class MediaService extends Service {
 	private static final int NOTIFY_ID = R.layout.crankplayer;
 	private final ID3Reader id3Reader = new ID3Reader();
 	private CallManager callManager;
+	private SDCardManager sdCardManager;
 
 	@Override
 	public void onCreate() {
@@ -38,6 +41,15 @@ public class MediaService extends Service {
 		}
 		nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		this.registerCallManager();
+		this.registerSDCardManager();
+	}
+
+	private void registerSDCardManager() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_MEDIA_SHARED);
+		this.sdCardManager = new SDCardManager(this.mediaThread);
+		registerReceiver(this.sdCardManager, filter);
+
 	}
 
 	private void registerCallManager() {
@@ -54,7 +66,12 @@ public class MediaService extends Service {
 		this.mediaThread.interrupt();
 		this.clearNotifications();
 		this.unregisterCallManager();
+		this.unregisterSDCardManager();
 		super.onDestroy();
+	}
+
+	private void unregisterSDCardManager() {
+		unregisterReceiver(this.sdCardManager);
 	}
 
 	private void unregisterCallManager() {

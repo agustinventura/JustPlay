@@ -38,8 +38,8 @@ import com.crankcode.adapters.SongAdapter;
 import com.crankcode.services.MediaService;
 import com.crankcode.services.binders.MediaServiceBinder;
 import com.crankcode.threads.MediaThread;
-import com.crankcode.utils.Logger;
 import com.crankcode.utils.ID3Reader;
+import com.crankcode.utils.Logger;
 import com.crankcode.utils.MediaStatus;
 
 public class MediaPlayer extends ListActivity {
@@ -59,7 +59,7 @@ public class MediaPlayer extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setContentView(R.layout.crankplayer);
-		Intent intent = new Intent(getBaseContext(), MediaService.class);
+		Intent intent = new Intent(this, MediaService.class);
 		this.startService(intent);
 		this.registerForContextMenu(getListView());
 		this.restoreState(savedInstanceState);
