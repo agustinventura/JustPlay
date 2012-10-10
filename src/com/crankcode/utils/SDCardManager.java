@@ -3,7 +3,6 @@ package com.crankcode.utils;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Environment;
 
 import com.crankcode.threads.MediaThread;
 
@@ -17,10 +16,10 @@ public class SDCardManager extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_SHARED.equals(state)) {
+		String action = intent.getAction();
+		if (action.equals(Intent.ACTION_MEDIA_EJECT)) {
 			// Device has been mounted on pc as mass storage
-			this.mediaThread.stop();
+			this.mediaThread.stopPlayback();
 		}
 	}
 

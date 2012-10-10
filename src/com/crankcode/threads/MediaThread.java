@@ -27,7 +27,6 @@ public class MediaThread extends Thread {
 
 	@Override
 	public void run() {
-		Logger.v(this, "run()");
 		this.setMediaPlayer(new MediaPlayer());
 	}
 
@@ -79,7 +78,7 @@ public class MediaThread extends Thread {
 			this.mediaPlayer
 					.setOnCompletionListener(new OnCompletionListener() {
 						public void onCompletion(MediaPlayer arg0) {
-							stopPlayback();
+							nextSong();
 						}
 					});
 
@@ -102,11 +101,12 @@ public class MediaThread extends Thread {
 	public MediaStatus stopPlayback() {
 		if (this.status.equals(MediaStatus.PLAYING)
 				|| this.status.equals(MediaStatus.PAUSED)) {
+			Logger.i(this, "stopping mediaPlayer");
 			this.mediaPlayer.stop();
-			this.mediaPlayer.release();
 			this.song = 0;
 			this.status = MediaStatus.STOPPED;
 		}
+		Logger.i(this, "updating notification");
 		this.mediaService.updateNotification(this.status, null);
 		return this.status;
 	}
@@ -146,14 +146,15 @@ public class MediaThread extends Thread {
 		// Check if last song or not
 		++this.song;
 		if (this.song >= this.playlist.size()) {
-			this.song = 0;
+			return stopPlayback();
+		} else {
+			return play(this.song);
 		}
-		return play(this.song);
 	}
 
 	public MediaStatus previousSong() {
 		int songPosition = this.song;
-		if (!this.status.equals(MediaStatus.PLAYING)) {
+		if (this.mediaPlayer.getCurrentPosition() < this.seekMiliseconds) {
 			if (this.song > 0) {
 				songPosition = --this.song;
 			}

@@ -46,7 +46,7 @@ public class MediaService extends Service {
 
 	private void registerSDCardManager() {
 		IntentFilter filter = new IntentFilter();
-		filter.addAction(Intent.ACTION_MEDIA_SHARED);
+		filter.addAction(Intent.ACTION_MEDIA_EJECT);
 		this.sdCardManager = new SDCardManager(this.mediaThread);
 		registerReceiver(this.sdCardManager, filter);
 
