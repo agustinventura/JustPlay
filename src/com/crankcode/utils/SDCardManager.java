@@ -19,7 +19,10 @@ public class SDCardManager extends BroadcastReceiver {
 		String action = intent.getAction();
 		if (action.equals(Intent.ACTION_MEDIA_EJECT)) {
 			// Device has been mounted on pc as mass storage
-			this.mediaThread.stopPlayback();
+			this.mediaThread.releaseMediaPlayer();
+		}
+		if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+			this.mediaThread.createMediaPlayer();
 		}
 	}
 

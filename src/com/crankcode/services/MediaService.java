@@ -47,6 +47,8 @@ public class MediaService extends Service {
 	private void registerSDCardManager() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(Intent.ACTION_MEDIA_EJECT);
+		filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+		filter.addDataScheme("file");
 		this.sdCardManager = new SDCardManager(this.mediaThread);
 		registerReceiver(this.sdCardManager, filter);
 

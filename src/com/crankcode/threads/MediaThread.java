@@ -7,6 +7,7 @@ import java.util.List;
 
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnErrorListener;
 
 import com.crankcode.services.MediaService;
 import com.crankcode.utils.Logger;
@@ -27,15 +28,7 @@ public class MediaThread extends Thread {
 
 	@Override
 	public void run() {
-		this.setMediaPlayer(new MediaPlayer());
-	}
-
-	public MediaPlayer getMediaPlayer() {
-		return mediaPlayer;
-	}
-
-	public void setMediaPlayer(MediaPlayer mediaPlayer) {
-		this.mediaPlayer = mediaPlayer;
+		this.mediaPlayer = new MediaPlayer();
 	}
 
 	public List<File> getPlaylist() {
@@ -77,11 +70,18 @@ public class MediaThread extends Thread {
 			this.mediaPlayer.start();
 			this.mediaPlayer
 					.setOnCompletionListener(new OnCompletionListener() {
-						public void onCompletion(MediaPlayer arg0) {
-							nextSong();
+						public void onCompletion(MediaPlayer mp) {
+							if (mp.isPlaying())
+								nextSong();
 						}
 					});
-
+			this.mediaPlayer.setOnErrorListener(new OnErrorListener() {
+				public boolean onError(MediaPlayer mp, int what, int extra) {
+					Logger.e(this, "Error on mediaplayer instance: " + what
+							+ " " + extra);
+					return true;
+				}
+			});
 			this.status = MediaStatus.PLAYING;
 			this.mediaService.updateNotification(this.status,
 					this.playlist.get(songPosition));
@@ -101,12 +101,10 @@ public class MediaThread extends Thread {
 	public MediaStatus stopPlayback() {
 		if (this.status.equals(MediaStatus.PLAYING)
 				|| this.status.equals(MediaStatus.PAUSED)) {
-			Logger.i(this, "stopping mediaPlayer");
 			this.mediaPlayer.stop();
 			this.song = 0;
 			this.status = MediaStatus.STOPPED;
 		}
-		Logger.i(this, "updating notification");
 		this.mediaService.updateNotification(this.status, null);
 		return this.status;
 	}
@@ -167,15 +165,22 @@ public class MediaThread extends Thread {
 		this.song = 0;
 	}
 
-	public void end() {
+	public void releaseMediaPlayer() {
 		this.stopPlayback();
-		this.playlist.clear();
-		if (this.mediaPlayer != null) {
-			this.mediaPlayer.release();
-			this.mediaPlayer = null;
-		}
+		this.mediaPlayer.release();
+	}
+
+	public void createMediaPlayer() {
+		this.mediaPlayer = new MediaPlayer();
+	}
+
+	public void end() {
+		this.releaseMediaPlayer();
 		// We make sure playlist and mediaPlayer are eligible for garbage
 		// collection
+		if (this.mediaPlayer != null) {
+			this.mediaPlayer = null;
+		}
 		this.playlist.clear();
 	}
 }
