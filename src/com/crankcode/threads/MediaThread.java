@@ -60,19 +60,22 @@ public class MediaThread extends Thread {
 	public MediaStatus play(int songPosition) {
 		try {
 			this.song = songPosition;
-			File selectedSong = this.playlist.get(songPosition);
-			if (this.mediaPlayer.isPlaying()) {
-				this.mediaPlayer.stop();
+			if (this.status.equals(MediaStatus.PAUSED)) {
+
+			} else {
+				File selectedSong = this.playlist.get(songPosition);
+				if (this.mediaPlayer.isPlaying()) {
+					this.mediaPlayer.stop();
+				}
+				this.mediaPlayer.reset();
+				this.mediaPlayer.setDataSource(selectedSong.getAbsolutePath());
+				this.mediaPlayer.prepare();
 			}
-			this.mediaPlayer.reset();
-			this.mediaPlayer.setDataSource(selectedSong.getAbsolutePath());
-			this.mediaPlayer.prepare();
 			this.mediaPlayer.start();
 			this.mediaPlayer
 					.setOnCompletionListener(new OnCompletionListener() {
 						public void onCompletion(MediaPlayer mp) {
-							if (mp.isPlaying())
-								nextSong();
+							nextSong();
 						}
 					});
 			this.mediaPlayer.setOnErrorListener(new OnErrorListener() {
