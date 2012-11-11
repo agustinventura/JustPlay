@@ -1,7 +1,6 @@
 package com.crankcode.activities;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,21 +21,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.crankcode.adapters.FileAdapter;
 import com.crankcode.utils.MediaFileFilter;
 
 public class FileExplorer extends ListActivity {
 
-	private final List<String> item = new ArrayList<String>();
-
-	private final List<String> path = new ArrayList<String>();
-
 	private final String root = "/";
 
 	private File position = null;
+
+	private final List<File> filesInDir = new ArrayList<File>();
 
 	private final MediaFileFilter mediaFileFilter = new MediaFileFilter();
 
@@ -48,7 +45,7 @@ public class FileExplorer extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.restoreState(savedInstanceState);
-		setContentView(R.layout.crankexplorer);
+		setContentView(R.layout.file_explorer);
 		myPath = (TextView) findViewById(R.id.path);
 		if (position == null) {
 			getDir(root);
@@ -60,62 +57,42 @@ public class FileExplorer extends ListActivity {
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putSerializable("item", (Serializable) item);
-		outState.putSerializable("path", (Serializable) path);
 		outState.putSerializable("position", position);
 		super.onSaveInstanceState(outState);
 	}
 
 	private void restoreState(Bundle savedInstanceState) {
 		if (savedInstanceState != null) {
-			if (savedInstanceState.containsKey("item")) {
-				this.item.addAll((List<String>) savedInstanceState
-						.getSerializable("item"));
-				this.path.addAll((List<String>) savedInstanceState
-						.getSerializable("path"));
+			if (savedInstanceState.containsKey("position")) {
 				this.position = (File) savedInstanceState.get("position");
 			}
 		} else {
 			SharedPreferences prefs = this.getSharedPreferences(
-					"com.crankcode.CrankExplorer", MODE_PRIVATE);
-			if (prefs.contains("crankExplorerDirectory")) {
+					"com.crankcode.FileExplorer", MODE_PRIVATE);
+			if (prefs.contains("fileExplorerDirectory")) {
 				this.position = new File(prefs.getString(
-						"crankExplorerDirectory", ""));
+						"fileExplorerDirectory", ""));
 			}
 		}
 	}
 
 	private void getDir(String dirPath) {
 		myPath.setText(getResources().getString(R.string.directory) + dirPath);
-		this.item.clear();
-		this.path.clear();
+		filesInDir.clear();
 		this.position = new File(dirPath);
 		File[] files = position.listFiles(mediaFileFilter);
 		Arrays.sort(files);
-		if (!dirPath.equals(root)) {
-			item.add(root);
-			path.add(root);
-			item.add("../");
-			path.add(position.getParent());
-		}
+		filesInDir.addAll(Arrays.asList(files));
+		filesInDir.add(0, new File("/"));
+		filesInDir.add(1, position.getParentFile());
 
-		for (File file : files) {
-			path.add(file.getPath());
-			if (file.isDirectory()) {
-				item.add(file.getName() + "/");
-			} else {
-				item.add(file.getName());
-			}
-		}
-
-		ArrayAdapter<String> fileList = new ArrayAdapter<String>(this,
-				R.layout.file_row, item);
-		setListAdapter(fileList);
+		FileAdapter fileAdapter = new FileAdapter(this, filesInDir);
+		setListAdapter(fileAdapter);
 	}
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		File file = new File(path.get(position));
+		File file = filesInDir.get(position);
 		if (file.isDirectory()) {
 			onDirectoryClick(position, file);
 		} else {
@@ -128,7 +105,7 @@ public class FileExplorer extends ListActivity {
 			ContextMenuInfo menuInfo) {
 		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
 		int selectedPosition = (int) info.id;
-		File selectedFile = new File(this.path.get(selectedPosition));
+		File selectedFile = filesInDir.get(selectedPosition);
 		if (selectedFile.isDirectory()) {
 			super.onCreateContextMenu(menu, v, menuInfo);
 			menu.setHeaderTitle(R.string.directory_contextual_title);
@@ -143,7 +120,7 @@ public class FileExplorer extends ListActivity {
 		case R.id.addDirectoryItem:
 			AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 					.getMenuInfo();
-			this.selected = new File(this.path.get((int) info.id));
+			this.selected = filesInDir.get(((int) info.id));
 			if (this.selected.isDirectory()) {
 				finish();
 			}
@@ -178,7 +155,7 @@ public class FileExplorer extends ListActivity {
 	}
 
 	private void onDirectoryClick(int position, File file) {
-		getDir(path.get(position));
+		getDir(filesInDir.get(position).getAbsolutePath());
 	}
 
 	@Override
@@ -201,13 +178,12 @@ public class FileExplorer extends ListActivity {
 	private void saveCurrentDirectory() {
 		if (this.selected != null) {
 			SharedPreferences prefs = this.getSharedPreferences(
-					"com.crankcode.CrankExplorer", MODE_PRIVATE);
+					"com.crankcode.FileExplorer", MODE_PRIVATE);
 			Editor editor = prefs.edit();
-			if (prefs.contains("crankExplorerDirectory")) {
-				editor.remove("crankExplorerDirectory");
+			if (prefs.contains("fileExplorerDirectory")) {
+				editor.remove("fileExplorerDirectory");
 			}
-			editor.putString("crankExplorerDirectory",
-					this.selected.getParent());
+			editor.putString("fileExplorerDirectory", this.selected.getParent());
 			editor.commit();
 		}
 	}

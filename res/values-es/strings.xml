@@ -15,8 +15,7 @@
 	<string name="paused">Pausado</string>
 	<string name="error">Error</string>	
 	
-	<!-- crankplayer texts -->
-	<string name="crankplayer_welcome">Bienvenido a JustPlay, el reproductor multimedia ligero para Android</string>
+	<!-- mediaplayer texts -->
 	<string name="open_explorer">Añadir canciones</string>
 	<string name="playlist_title">Lista de Reproducción</string>
 	<string name="now_playing">Reproduciendo: </string>
@@ -32,11 +31,13 @@
 	<string name="play_error">Error reproduciendo ##songName##, ¿desea eliminarla de la lista de reproducción?</string>
 	<string name="remove_song">Eliminar canción de la lista de reproducción</string>
 	
-	<!-- crankexplorer texts -->
-	<string name="crankexplorer_welcome">Bienvenido al explorador de archivos</string>
+	<!-- fileexplorer texts -->
 	<string name="directory">Directorio: </string>
 	<string name="empty_directory">El directorio esta vacío</string>
 	<string name="add_file">¿Desea añadir la canción seleccionada a la lista de reproducción?</string>
 	<string name="directory_contextual_title">Directorio Seleccionado</string>
 	<string name="add_directory">Añadir todas las canciones</string>
+	<string name="file_icon">Icono de archivo o directorio</string>
+	<string name="root_folder">/</string>
+	<string name="parent_folder">../</string>
 </resources>

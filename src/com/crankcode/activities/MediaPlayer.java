@@ -58,7 +58,7 @@ public class MediaPlayer extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.setContentView(R.layout.crankplayer);
+		this.setContentView(R.layout.media_player);
 		Intent intent = new Intent(this, MediaService.class);
 		this.startService(intent);
 		this.registerForContextMenu(getListView());

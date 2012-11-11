@@ -27,7 +27,7 @@ public class MediaService extends Service {
 	private MediaThread mediaThread = null;
 	private final IBinder mediaServiceBinder = new MediaServiceBinder(this);
 	private NotificationManager nm;
-	private static final int NOTIFY_ID = R.layout.crankplayer;
+	private static final int NOTIFY_ID = R.layout.media_player;
 	private final ID3Reader id3Reader = new ID3Reader();
 	private CallManager callManager;
 	private SDCardManager sdCardManager;

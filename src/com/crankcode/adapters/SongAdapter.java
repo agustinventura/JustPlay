@@ -42,9 +42,9 @@ public class SongAdapter extends BaseAdapter {
 		if (rowView == null) {
 			LayoutInflater inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			rowView = inflater.inflate(R.layout.file_row, null);
+			rowView = inflater.inflate(R.layout.song_row, null);
 			ViewHolder viewHolder = new ViewHolder();
-			viewHolder.text = (TextView) rowView.findViewById(R.id.fileRow);
+			viewHolder.text = (TextView) rowView.findViewById(R.id.songName);
 			rowView.setTag(viewHolder);
 		}
 		ViewHolder holder = (ViewHolder) rowView.getTag();
