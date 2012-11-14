@@ -1,6 +1,9 @@
 package com.crankcode.activities;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,6 +17,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuInflater;
@@ -25,15 +29,17 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.crankcode.adapters.FileAdapter;
+import com.crankcode.utils.FileComparator;
+import com.crankcode.utils.Logger;
 import com.crankcode.utils.MediaFileFilter;
 
 public class FileExplorer extends ListActivity {
 
-	private final String root = "/";
-
 	private File position = null;
 
 	private final List<File> filesInDir = new ArrayList<File>();
+
+	private final FileComparator fileComparator = new FileComparator();
 
 	private final MediaFileFilter mediaFileFilter = new MediaFileFilter();
 
@@ -48,9 +54,9 @@ public class FileExplorer extends ListActivity {
 		setContentView(R.layout.file_explorer);
 		myPath = (TextView) findViewById(R.id.path);
 		if (position == null) {
-			getDir(root);
+			getDir(findSDPath());
 		} else {
-			getDir(this.position.getPath());
+			getDir(this.position);
 		}
 		registerForContextMenu(getListView());
 	}
@@ -76,12 +82,13 @@ public class FileExplorer extends ListActivity {
 		}
 	}
 
-	private void getDir(String dirPath) {
-		myPath.setText(getResources().getString(R.string.directory) + dirPath);
+	private void getDir(File dir) {
+		myPath.setText(getResources().getString(R.string.directory)
+				+ dir.getAbsolutePath());
 		filesInDir.clear();
-		this.position = new File(dirPath);
+		this.position = dir;
 		File[] files = position.listFiles(mediaFileFilter);
-		Arrays.sort(files);
+		Arrays.sort(files, fileComparator);
 		filesInDir.addAll(Arrays.asList(files));
 		filesInDir.add(0, new File("/"));
 		filesInDir.add(1, position.getParentFile());
@@ -155,7 +162,7 @@ public class FileExplorer extends ListActivity {
 	}
 
 	private void onDirectoryClick(int position, File file) {
-		getDir(filesInDir.get(position).getAbsolutePath());
+		getDir(filesInDir.get(position));
 	}
 
 	@Override
@@ -200,5 +207,50 @@ public class FileExplorer extends ListActivity {
 			}
 		}
 		return filesInDirectory;
+	}
+
+	private File findSDPath() {
+		File externalSD = Environment.getExternalStorageDirectory();
+		File file = new File("/system/etc/vold.fstab");
+		FileReader fr = null;
+		BufferedReader br = null;
+		try {
+			fr = new FileReader(file);
+			if (fr != null) {
+				br = new BufferedReader(fr);
+				String s = br.readLine();
+				boolean foundExternalSD = false;
+				while (s != null && !foundExternalSD) {
+					if (s.startsWith("dev_mount")) {
+						String[] tokens = s.split("\\s");
+						String path = tokens[2]; // mount_point
+						if (!Environment.getExternalStorageDirectory()
+								.getAbsolutePath().equals(path)) {
+							foundExternalSD = true;
+							externalSD = new File(path);
+						}
+					}
+					s = br.readLine();
+				}
+			}
+		} catch (IOException e) {
+			Logger.e(
+					this,
+					"Could not read external SD path: "
+							+ e.getLocalizedMessage());
+		} finally {
+			try {
+				if (fr != null) {
+					fr.close();
+				}
+				if (br != null) {
+					br.close();
+				}
+			} catch (IOException e) {
+				Logger.e(this,
+						"Could not close resources: " + e.getLocalizedMessage());
+			}
+		}
+		return externalSD;
 	}
 }
