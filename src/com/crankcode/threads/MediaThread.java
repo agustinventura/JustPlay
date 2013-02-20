@@ -60,9 +60,7 @@ public class MediaThread extends Thread {
 	public MediaStatus play(int songPosition) {
 		try {
 			this.song = songPosition;
-			if (this.status.equals(MediaStatus.PAUSED)) {
-
-			} else {
+			if (!this.status.equals(MediaStatus.PAUSED)) {
 				File selectedSong = this.playlist.get(songPosition);
 				if (this.mediaPlayer.isPlaying()) {
 					this.mediaPlayer.stop();
